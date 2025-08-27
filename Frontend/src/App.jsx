@@ -9,6 +9,7 @@ import ContactUs from './components/ContactUs';
 import { Toaster } from 'react-hot-toast';
 import Footer from './components/Footer';
 import AuthApp from './components/auth/AuthApp';
+import Explore from './components/explore/Explore'; // 👈 import Explore
 
 const MainPage = ({ theme, setTheme, dotRef, outlineRef }) => {
   return (
@@ -86,7 +87,7 @@ const App = () => {
             } 
           />
          <Route path="/auth" element={<AuthApp theme={theme} />} />
-
+         <Route path="/explore" element={<Explore theme={theme} setTheme={setTheme} />} /> {/* 👈 pass theme props */}
         </Routes>
 
         {/* Custom Cursor Ring */}
