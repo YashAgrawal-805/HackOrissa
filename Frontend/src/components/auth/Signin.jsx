@@ -4,7 +4,7 @@ import assets from "../../assets/assets";   // âœ… fixed import
 
 function SignInForm() {
   const [state, setState] = React.useState({
-    email: "",
+    username: "",
     password: ""
   });
   const navigate = useNavigate();
@@ -19,12 +19,12 @@ function SignInForm() {
 
   const handleOnSubmit = (evt) => {
     evt.preventDefault();
-    const { email, password } = state;
-    alert(`You are login with email: ${email} and password: ${password}`);
+    const { username, password } = state;
+    alert(`You are login with username: ${username} and password: ${password}`);
 
     // navigate('/'); // enable if you want redirect
 
-    setState({ email: "", password: "" });
+    setState({ username: "", password: "" });
   };
 
   return (
@@ -38,7 +38,7 @@ function SignInForm() {
             <img src={assets.facebook_icon} alt="facebook" className="w-5" />
           </a>
           <a href="#" className="social">
-            <img src={assets.email_icon} alt="google" className="w-5" />
+            <img src={assets.email_icon} alt="email" className="w-5" />
           </a>
           <a href="#" className="social">
             <img src={assets.linkedin_icon} alt="linkedin" className="w-5" />
@@ -47,10 +47,10 @@ function SignInForm() {
 
         <span>or use your account</span>
         <input
-          type="email"
-          placeholder="Email"
-          name="email"
-          value={state.email}
+          type="text"
+          placeholder="username"
+          name="username"
+          value={state.username}
           onChange={handleChange}
           required
         />

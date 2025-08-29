@@ -12,7 +12,7 @@ exports.registerUser = async (req, res) => {
     const existing = await usersRef.where("username", "==", username).get();
 
     if (!existing.empty) {
-      return res.status(400).json({ error: "Username already exists" });
+      return res.json({ error: "Username already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,6 +31,7 @@ exports.registerUser = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 1 * 60 * 60 * 1000,
     });
@@ -51,7 +52,7 @@ exports.loginUser = async (req, res) => {
     const snapshot = await usersRef.where("username", "==", username).get();
 
     if (snapshot.empty) {
-      return res.status(400).json({ error: "User not found" });
+      return res.json({ error: "User not found" });
     }
 
     const userDoc = snapshot.docs[0];
@@ -59,13 +60,14 @@ exports.loginUser = async (req, res) => {
 
     const match = await bcrypt.compare(password, userData.password);
     if (!match) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.json({ error: "Invalid credentials" });
     }
 
     const token = generateToken({ id: userDoc.id, username, phone: userData.phone });
 
     res.cookie("token", token, {
       httpOnly: true,
+      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 1 * 60 * 60 * 1000,
     });

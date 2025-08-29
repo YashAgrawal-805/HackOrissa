@@ -11,7 +11,7 @@ const db = admin.firestore();
 
 router.post('/toggle-tracking', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.user.id;
 
     if (!userId) {
       return res.status(400).json({ error: 'Missing userId' });
@@ -46,10 +46,6 @@ router.post('/toggle-tracking', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
-
-
 
 //toggle-group-activation
 
@@ -101,7 +97,8 @@ router.post('/toggle-group-activation', authenticateToken, async (req, res) => {
 
 router.post('/create-group', authenticateToken, async (req, res) => {
   try {
-    const { groupName, adminPhone, subAdminPhone, memberPhones } = req.body;
+    const { groupName, subAdminPhone, memberPhones } = req.body;
+    const adminPhone = req.user.phone;
 
     if (!groupName || !adminPhone || !Array.isArray(memberPhones)) {
       return res.status(400).json({ error: 'Invalid request payload' });
@@ -121,7 +118,6 @@ router.post('/create-group', authenticateToken, async (req, res) => {
       if (subAdminSnapshot.empty) return res.status(404).json({ error: 'Sub-admin not found' });
       subAdminDoc = subAdminSnapshot.docs[0];
     }
-
     // Fetch all members by phone
     const memberIds = [];
     for (const phone of memberPhones) {
@@ -129,7 +125,7 @@ router.post('/create-group', authenticateToken, async (req, res) => {
       if (snapshot.empty) return res.status(404).json({ error: `User with phone ${phone} not found` });
       memberIds.push(snapshot.docs[0].id);
     }
-
+    console.log('Member IDs:', memberIds);
     // Add admin and sub-admin to members list if not already there
     if (!memberIds.includes(adminDoc.id)) memberIds.push(adminDoc.id);
     if (subAdminDoc && !memberIds.includes(subAdminDoc.id)) memberIds.push(subAdminDoc.id);
@@ -142,11 +138,11 @@ router.post('/create-group', authenticateToken, async (req, res) => {
       ISactive: false, // initially inactive
       members: memberIds
     };
-
+    console.log('Group Data:', groupData);
     // Save group to Firestore and get ID
     const groupRef = await db.collection('groups').add(groupData);
     const groupId = groupRef.id;
-
+    console.log('New Group ID:', groupId);
     // Update each member’s user document to store groupId
     const updatePromises = memberIds.map(userId =>
       usersRef.doc(userId).update({
@@ -154,7 +150,7 @@ router.post('/create-group', authenticateToken, async (req, res) => {
       })
     );
     await Promise.all(updatePromises);
-
+    console.log('Group created with ID:', groupId);
     res.status(201).json({ message: 'Group created successfully', groupId, groupData });
 
   } catch (err) {
@@ -170,9 +166,10 @@ router.post('/create-group', authenticateToken, async (req, res) => {
 
 router.post('/update-location',authenticateToken ,async (req, res) => {
   try {
-    const { phone, latitude, longitude } = req.body;
+    const { latitude, longitude } = req.body;
+    const userId = req.user.id;
 
-    const userRef = db.collection('users').where('phone', '==', phone);
+    const userRef = db.collection('users').doc(userId);;
     const snap = await userRef.get();
     if (snap.empty) return res.status(404).json({ error: 'User not found' });
 
@@ -200,7 +197,7 @@ router.post('/update-location',authenticateToken ,async (req, res) => {
 
 router.post('/calculate-distance', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.user.id;
     if (!userId) {
       return res.status(400).json({ error: 'Missing userId' });
     }
@@ -280,7 +277,7 @@ router.post('/calculate-distance', authenticateToken, async (req, res) => {
 //solo-toggle
 router.post('/toggle-solo', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.user.id;
 
     if (!userId) {
       return res.status(400).json({ error: 'Missing userId' });
@@ -367,7 +364,7 @@ router.post('/add-locations', async (req, res) => {
 router.get('/check-nearby-places', async (req, res) => {
   try {
     // You can take userId from query params or JWT
-    const { userId } = req.query; 
+    const userId = req.user.id; 
 
     if (!userId) {
       return res.status(400).json({ error: "Missing userId" });
@@ -516,7 +513,8 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 
 router.get('/find-solo-travellers', authenticateToken, async (req, res) => {
   try {
-    const { userId, latitude, longitude } = req.query; 
+    const {latitude, longitude } = req.body;
+    const userId = req.user.id; // Assuming authenticateToken sets req.user.id 
     // If frontend sends via query params ?userId=..&latitude=..&longitude=..
     // OR use req.body if it’s a POST request
 

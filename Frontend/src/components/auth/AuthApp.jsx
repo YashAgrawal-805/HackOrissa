@@ -33,7 +33,6 @@ const AuthApp = ({ theme }) => {
             theme === "dark" ? "text-white" : "text-black"
           }`}
         >
-          Login Page
         </h1>
 
         <div className={containerClass} id="container">
