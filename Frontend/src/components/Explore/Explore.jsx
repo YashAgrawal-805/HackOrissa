@@ -29,7 +29,7 @@ const Explore = ({ theme, setTheme }) => {
       <HeroAnimation theme={theme} />
       <Heading theme={theme}/>
       <CardsParallaxAnimation theme={theme} />
-      {/* <Footer /> */}
+       <Footer /> 
     </div>
   );
 };
