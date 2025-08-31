@@ -150,6 +150,11 @@ router.post('/create-group', authenticateToken, async (req, res) => {
       })
     );
     await Promise.all(updatePromises);
+
+     // ✅ Trigger socket event manually here
+    req.io.emit("createGroup", { groupId, members: memberIds });
+
+    
     console.log('Group created with ID:', groupId);
     res.status(201).json({ message: 'Group created successfully', groupId, groupData });
 
@@ -161,35 +166,7 @@ router.post('/create-group', authenticateToken, async (req, res) => {
 
 
 
-//updates location
 
-
-router.post('/update-location',authenticateToken ,async (req, res) => {
-  try {
-    const { latitude, longitude } = req.body;
-    const userId = req.user.id;
-
-    const userRef = db.collection('users').doc(userId);;
-    const snap = await userRef.get();
-    if (snap.empty) return res.status(404).json({ error: 'User not found' });
-
-    const doc = snap.docs[0];
-    const userData = doc.data();
-
-    if (!userData.trackingEnabled) {
-      return res.status(403).json({ error: 'User has disabled tracking' });
-    }
-
-    await db.collection('users').doc(doc.id).update({
-      lastLocation: { latitude, longitude }
-    });
-
-    res.json({ message: 'Location updated' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 
 
@@ -197,71 +174,69 @@ router.post('/update-location',authenticateToken ,async (req, res) => {
 
 router.post('/calculate-distance', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.user.id;
-    if (!userId) {
-      return res.status(400).json({ error: 'Missing userId' });
-    }
+    const userId = req.user.id;
 
-    // 1️⃣ Get the user doc
+    // 1️⃣ Get the user doc (the logged-in user)
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     const userData = userDoc.data();
-    console.log('User Data:', userData);
-
-    if (!userData.groups || !Array.isArray(userData.groups) || userData.groups.length === 0) {
-      return res.status(200).json({ message: 'User is not in any groups' });
+    if (!userData.groups || userData.groups.length === 0) {
+      return res.json({ message: 'User is not in any groups' });
     }
 
     if (!userData.lastLocation) {
-      return res.status(400).json({ error: 'User location not found' });
+      return res.status(400).json({ error: 'Admin location not found' });
     }
 
     const notifications = [];
 
-    // 2️⃣ Loop through groups
+    // 2️⃣ Loop through groups the user is in
     for (const groupId of userData.groups) {
       const groupDoc = await db.collection('groups').doc(groupId).get();
       if (!groupDoc.exists) continue;
 
       const groupData = groupDoc.data();
-      console.log('Group Data:', groupData);
+
+      // ✅ Check if the logged-in user is the admin
+      if (groupData.admin !== userId) continue; // skip if not admin
 
       // Skip inactive groups
       if (!groupData.ISactive) continue;
 
-      // ✅ Fetch admin info from users collection
-      const adminId = groupData.admin; // admin is just the userId
-      if (!adminId) continue;
+      // ✅ Get all group members
+      if (!groupData.members || !Array.isArray(groupData.members)) continue;
 
-      const adminDoc = await db.collection('users').doc(adminId).get();
-      if (!adminDoc.exists) continue;
+      for (const memberId of groupData.members) {
+        if (memberId === userId) continue; // skip self (admin)
 
-      const adminData = adminDoc.data();
-      console.log('Admin Data:', adminData);
+        const memberDoc = await db.collection('users').doc(memberId).get();
+        if (!memberDoc.exists) continue;
 
-      if (!adminData.lastLocation) continue;
+        const memberData = memberDoc.data();
+        if (!memberData.lastLocation) continue;
 
-      // 3️⃣ Calculate distance
-      const distance = geolib.getDistance(
-        { latitude: userData.lastLocation.latitude, longitude: userData.lastLocation.longitude },
-        { latitude: adminData.lastLocation.latitude, longitude: adminData.lastLocation.longitude }
-      );
+        // 3️⃣ Calculate distance
+        const distance = geolib.getDistance(
+          { latitude: userData.lastLocation.latitude, longitude: userData.lastLocation.longitude },
+          { latitude: memberData.lastLocation.latitude, longitude: memberData.lastLocation.longitude }
+        );
 
-      if (distance > 7000) {
-        const km = (distance / 1000).toFixed(2);
-        const msg = `${userData.username || 'A member'} is ${km} km away from you in group ${groupData.groupName}`;
+        if (distance > 7000) {
+          const km = (distance / 1000).toFixed(2);
+          const msg = `${memberData.username || 'A member'} is ${km} km away from you in group ${groupData.groupName}`;
 
-        // Store notification in Firestore (optional)
-        await db.collection('notifications').add({
-          to: adminData.phone,
-          message: msg,
-          timestamp: admin.firestore.FieldValue.serverTimestamp()
-        });
+          // Store notification in Firestore (optional)
+          await db.collection('notifications').add({
+            to: userData.phone, // admin's phone
+            message: msg,
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
+          });
 
-        notifications.push({ groupId, message: msg });
+          notifications.push({ groupId, message: msg });
+        }
       }
     }
 
@@ -272,6 +247,7 @@ router.post('/calculate-distance', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 //solo-toggle
@@ -570,6 +546,47 @@ router.get('/find-solo-travellers', authenticateToken, async (req, res) => {
 
   } catch (err) {
     console.error('Error finding solo travellers:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
+router.get('/see-groups', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id; // userId from token
+
+    // 1. Find the user
+    const userDoc = await db.collection('users').doc(userId).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const userData = userDoc.data();
+
+    // 2. Check if groups field exists
+    if (!userData.groups || userData.groups.length === 0) {
+      return res.json({ message: 'User is not in any groups', groups: [] });
+    }
+
+    // 3. Fetch all groups by their IDs (only groupId)
+    const groupsData = [];
+    for (const groupId of userData.groups) {
+      const groupDoc = await db.collection('groups').doc(groupId).get();
+      if (groupDoc.exists) {
+        groupsData.push(groupDoc.id); // ✅ store only groupId
+      }
+    }
+
+    // 4. Send response
+    res.json({
+      message: 'User groups fetched successfully',
+      groups: groupsData
+    });
+
+  } catch (err) {
+    console.error('Error fetching groups:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

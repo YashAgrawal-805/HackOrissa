@@ -5,7 +5,7 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 const socketAuth = require("./middlewares/soketToken");
-const liveTracking = require("./routes/soketRoute");
+const liveTracking = require("./socketMain/socket");
 const admin = require("./config/firebase");
 const db = admin.firestore();
 // Import routes
@@ -37,9 +37,17 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
+
+
+
 
 socketAuth(io);
-liveTracking(io);
+liveTracking(io,db);
 
 // Use routes
 app.use("/users", userRoutes);
