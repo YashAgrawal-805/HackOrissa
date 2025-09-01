@@ -3,7 +3,6 @@ const admin = require("../config/firebase");
 
 const db = admin.firestore();
 
-// ✅ Function to calculate distance notifications
 async function distanceMeasure(userId) {
   try {
     if (!userId) {
@@ -70,11 +69,11 @@ async function distanceMeasure(userId) {
         } is ${km} km away from you in group ${groupData.groupName}`;
 
         // Store notification in Firestore
-        await db.collection("notifications").add({
-          to: adminData.phone,
-          message: msg,
-          timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        });
+        // await db.collection("notifications").add({
+        //   to: adminData.phone,
+        //   message: msg,
+        //   timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        // });
 
         notifications.push({ groupId, message: msg });
       }
@@ -87,7 +86,6 @@ async function distanceMeasure(userId) {
   }
 }
 
-// Function
 async function checkNearbyPlaces(userId) {
   if (!userId) {
     throw new Error("Missing userId");
@@ -118,22 +116,26 @@ async function checkNearbyPlaces(userId) {
     if (distanceInKm <= 40) {
       nearbyPlaces.push({
         name: loc.name,
-        distanceInKm: distanceInKm.toFixed(2),
+        distanceInKm,
         openTime: loc.openTime,
         closeTime: loc.closeTime,
       });
     }
   });
-
+  let minDist = Infinity;
+  let closestPlace = null;
   for (const place of nearbyPlaces) {
-    await db.collection("notifications").add({
-      to: userData.phone,
-      message: `You are ${place.distanceInKm} km away from ${place.name}. Open: ${place.openTime} - ${place.closeTime}`,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    if (place.distanceInKm < minDist) {
+      minDist = place.distanceInKm;
+      closestPlace = place;
+    }
   }
+  await db.collection("users").doc(userId).update({
+    lastSharedAt: Date.now(),
+    lastSharedPlace: closestPlace.name
+  });
 
-  return { nearbyPlaces };
+  return closestPlace;
 }
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
