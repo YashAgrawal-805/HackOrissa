@@ -1,29 +1,28 @@
-// styabuddy.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { ImageCarousel, Buttons } from './parallex'; // Assuming CurtainAnimation is now directly in this file or imported correctly.
+import { ImageCarousel, Buttons } from './parallex';
 
-// CurtainAnimation component definition (moved here for clarity, or ensure it's imported correctly from parallex)
+// CurtainAnimation component definition
 const CurtainAnimation = ({ curtainType, theme, lottieSrc, loadingText }) => (
   <motion.div
     initial={{ y: "100%" }}
     animate={{ y: 0 }}
     exit={{ y: "100%" }}
     transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }}
-    style={{ 
-      position: 'absolute', 
-      top: 0, 
-      left: 0, 
-      width: '100%', 
-      height: '100%', 
-      background: theme === 'dark' 
-        ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%)' 
-        : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 75%, #cbd5e1 100%)', 
-      display: 'flex', 
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: theme === 'dark'
+        ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%)'
+        : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 75%, #cbd5e1 100%)',
+      display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center', 
-      justifyContent: 'center', 
+      alignItems: 'center',
+      justifyContent: 'center',
       borderRadius: '25px',
       zIndex: 15
     }}
@@ -65,8 +64,8 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showCurtain, setShowCurtain] = useState(false);
   const [curtainType, setCurtainType] = useState('');
-  const [lottieSrc, setLottieSrc] = useState(''); // New state for Lottie source
-  const [loadingText, setLoadingText] = useState(''); // New state for loading text
+  const [lottieSrc, setLottieSrc] = useState('');
+  const [loadingText, setLoadingText] = useState('');
   const [showInvitationInterface, setShowInvitationInterface] = useState(false);
   const [showFriendsList, setShowFriendsList] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -126,47 +125,43 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
   const handleButtonClick = (type) => {
     setCurtainType(type);
     setShowCurtain(true);
-    let animationDuration = 3000; // Default Lottie animation duration
-    
+    let animationDuration = 3000;
+
     if (type === 'find') {
-      setLottieSrc('/staybuddy.lottie'); // Path to your StayBuddy Lottie file
+      setLottieSrc('/staybuddy.lottie');
       setLoadingText('Finding your stay buddy...');
-      
+
       setTimeout(() => {
         setShowCurtain(false);
         setShowInvitationInterface(true);
         setCurtainType('');
-        setLottieSrc(''); // Clear Lottie source after use
-        setLoadingText(''); // Clear loading text after use
+        setLottieSrc('');
+        setLoadingText('');
       }, animationDuration);
     } else if (type === 'friend') {
-      // Assuming you have a different Lottie for friends list, or use the same
-      setLottieSrc('/friends_loading.lottie'); // Example for a different Lottie
+      setLottieSrc('/friends_loading.lottie');
       setLoadingText('Loading your friends list...');
-      
+
       setTimeout(() => {
         setShowCurtain(false);
         setShowFriendsList(true);
         setCurtainType('');
-        setLottieSrc(''); // Clear Lottie source after use
-        setLoadingText(''); // Clear loading text after use
+        setLottieSrc('');
+        setLoadingText('');
       }, animationDuration);
     } else {
-      // For other types that might just need a curtain, no Lottie
-      setLottieSrc(''); 
+      setLottieSrc('');
       setLoadingText('');
       setTimeout(() => {
         setShowCurtain(false);
         setCurtainType('');
-      }, 800); // Shorter curtain for non-Lottie animations
+      }, 800);
     }
   };
 
   const handleBackClick = () => {
     setShowInvitationInterface(false);
     setShowFriendsList(false);
-    // Ensure that if the Lottie was visible, it's also hidden.
-    // However, the current flow ensures it's hidden before these interfaces show.
   };
 
   const handleSendInvitation = (name) => {
@@ -185,16 +180,16 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
     <motion.div
       whileHover={{ scale: 1.02, y: -2 }}
       style={{
-        background: theme === 'dark' 
-          ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' 
+        background: theme === 'dark'
+          ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
           : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
         border: theme === 'dark' ? '1px solid #475569' : '1px solid #e2e8f0',
         borderRadius: '15px',
         padding: '16px',
         marginBottom: '12px',
         minWidth: '0',
-        boxShadow: theme === 'dark' 
-          ? '0 4px 15px rgba(0,0,0,0.3)' 
+        boxShadow: theme === 'dark'
+          ? '0 4px 15px rgba(0,0,0,0.3)'
           : '0 4px 15px rgba(0,0,0,0.1)'
       }}
     >
@@ -210,14 +205,14 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
           boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
         }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ color: '#ffffff' }}>
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div style={{ flex: 1, minWidth: '0' }}>
-          <h4 style={{ 
-            margin: '0 0 4px 0', 
-            fontSize: '16px', 
+          <h4 style={{
+            margin: '0 0 4px 0',
+            fontSize: '16px',
             fontWeight: '600',
             color: theme === 'dark' ? '#ffffff' : '#000000',
             overflow: 'hidden',
@@ -226,9 +221,9 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
           }}>
             {person.name}
           </h4>
-          <p style={{ 
-            margin: '0', 
-            fontSize: '14px', 
+          <p style={{
+            margin: '0',
+            fontSize: '14px',
             color: theme === 'dark' ? '#94a3b8' : '#6b7280',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -245,24 +240,24 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
     <motion.div
       whileHover={{ scale: 1.02, y: -2 }}
       style={{
-        background: theme === 'dark' 
-          ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)' 
+        background: theme === 'dark'
+          ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
           : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
         border: theme === 'dark' ? '1px solid #475569' : '1px solid #e2e8f0',
         borderRadius: '15px',
         padding: '16px',
         marginBottom: '12px',
         minWidth: '0',
-        boxShadow: theme === 'dark' 
-          ? '0 4px 15px rgba(0,0,0,0.3)' 
+        boxShadow: theme === 'dark'
+          ? '0 4px 15px rgba(0,0,0,0.3)'
           : '0 4px 15px rgba(0,0,0,0.1)'
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
         <div style={{ flex: 1, minWidth: '0' }}>
-          <h4 style={{ 
-            margin: '0 0 4px 0', 
-            fontSize: '16px', 
+          <h4 style={{
+            margin: '0 0 4px 0',
+            fontSize: '16px',
             fontWeight: '600',
             color: theme === 'dark' ? '#ffffff' : '#000000',
             overflow: 'hidden',
@@ -271,9 +266,9 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
           }}>
             {person.name}
           </h4>
-          <p style={{ 
-            margin: '0', 
-            fontSize: '14px', 
+          <p style={{
+            margin: '0',
+            fontSize: '14px',
             color: theme === 'dark' ? '#94a3b8' : '#6b7280',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -296,8 +291,8 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
             fontWeight: '600',
             cursor: 'pointer',
             whiteSpace: 'nowrap',
-            boxShadow: type === 'send' 
-              ? '0 2px 8px rgba(16, 185, 129, 0.3)' 
+            boxShadow: type === 'send'
+              ? '0 2px 8px rgba(16, 185, 129, 0.3)'
               : '0 2px 8px rgba(99, 102, 241, 0.3)'
           }}
         >
@@ -308,22 +303,22 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
   );
 
   const InvitationSection = ({ title, data, type, onAction }) => (
-    <div style={{ 
-      flex: 1, 
+    <div style={{
+      flex: 1,
       minHeight: '0',
       display: 'flex',
       flexDirection: 'column'
     }}>
-      <h3 style={{ 
-        margin: '0 0 20px 0', 
-        fontSize: isMobile ? '20px' : '24px', 
+      <h3 style={{
+        textAlign: 'center',
+        margin: '0 0 20px 0',
+        fontSize: isMobile ? '20px' : '24px',
         fontWeight: '700',
         color: theme === 'dark' ? '#ffffff' : '#000000',
-        textAlign: 'center'
       }}>
         {title}
       </h3>
-      <div style={{ 
+      <div style={{
         flex: 1,
         overflowY: 'auto',
         paddingRight: '8px',
@@ -339,11 +334,11 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
           `}
         </style>
         {data.map((person, index) => (
-          <InvitationCard 
-            key={index} 
-            person={person} 
-            type={type} 
-            onAction={onAction} 
+          <InvitationCard
+            key={index}
+            person={person}
+            type={type}
+            onAction={onAction}
           />
         ))}
       </div>
@@ -358,22 +353,23 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          height: isMobile ? '500px' : '500px',
+          height: isMobile ? '80vh' : '500px',
+          minHeight: '500px',
           width: '1000px',
           maxWidth: '90vw',
           borderRadius: '25px',
-          padding: !showInvitationInterface && !showFriendsList && !showCurtain ? (isMobile ? '24px' : '50px') : '0', // Adjust padding based on visible content
-          background: theme === 'dark' 
-            ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%)' 
+          padding: !showInvitationInterface && !showFriendsList && !showCurtain ? (isMobile ? '24px' : '50px') : '20px',
+          background: theme === 'dark'
+            ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%)'
             : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 75%, #cbd5e1 100%)',
           border: theme === "dark" ? '1px solid #333333' : '1px solid #e2e8f0',
           top: `calc(-5vh + ${i * 25}px)`,
           transformOrigin: 'top',
-          boxShadow: theme === 'dark' 
-            ? '0 15px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)' 
+          boxShadow: theme === 'dark'
+            ? '0 15px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)'
             : '0 15px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)',
           overflow: 'hidden',
-          scale: showCurtain ? 1 : scale // Maintain scale if curtain is active
+          scale: showCurtain ? 1 : scale
         }}
       >
         <AnimatePresence>
@@ -388,8 +384,8 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
               onClick={handleBackClick}
               style={{
                 position: 'absolute',
-                top: '15px',
-                left: '15px',
+                top: isMobile ? '10px' : '20px',
+                left: isMobile ? '10px' : '20px',
                 background: theme === 'dark' ? '#374151' : '#f3f4f6',
                 border: 'none',
                 borderRadius: '50%',
@@ -404,7 +400,7 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: theme === 'dark' ? '#ffffff' : '#000000' }}>
-                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </motion.button>
           )}
@@ -433,11 +429,11 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
                 <span>Find Your </span><span style={{ color: '#6366f1' }}>Stay Buddy</span>
               </h2>
 
-              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '16px' : '50px', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '24px' : '50px', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: 'auto', marginBottom: 'auto' }}>
                 {isMobile ? (
                   <>
                     <ImageCarousel carouselImages={carouselImages} currentImageIndex={currentImageIndex} imageScale={imageScale} />
-                    <p style={{ fontSize: isMobile ? '16px' : '19px', color: theme === "dark" ? '#e2e8f0' : '#374151', textAlign: isMobile ? 'center' : 'left', maxWidth: isMobile ? '100%' : '480px' }}>
+                    <p style={{ fontSize: '16px', color: theme === "dark" ? '#e2e8f0' : '#374151', textAlign: 'center', maxWidth: '100%', padding: '0 10px', margin: '0' }}>
                       Find your roommate or flatmate for the trip according to your convenience. Connect with like-minded travelers and make your journey memorable.
                     </p>
                     <Buttons handleButtonClick={handleButtonClick} theme={theme} />
@@ -464,25 +460,25 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.5 }}
-              style={{ 
-                height: '100%', 
-                display: 'flex', 
+              style={{
+                height: '100%',
+                display: 'flex',
                 flexDirection: 'column',
                 marginTop: '20px',
-                padding: isMobile ? '10px' : '20px'
+                padding: '20px'
               }}
             >
-              <h2 style={{ 
-                textAlign: 'center', 
-                margin: '0 0 20px 0', 
-                fontSize: isMobile ? '24px' : '32px', 
-                fontWeight: '800', 
-                color: theme === 'dark' ? '#ffffff' : '#000000' 
+              <h2 style={{
+                textAlign: 'center',
+                margin: '0 0 20px 0',
+                fontSize: isMobile ? '24px' : '32px',
+                fontWeight: '800',
+                color: theme === 'dark' ? '#ffffff' : '#000000'
               }}>
                 <span style={{ color: '#6366f1' }}>Friend</span> List
               </h2>
 
-              <div style={{ 
+              <div style={{
                 flex: 1,
                 overflowY: 'auto',
                 paddingRight: '8px',
@@ -503,7 +499,7 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
               </div>
             </motion.div>
           )}
-          
+
           {showInvitationInterface && (
             <motion.div
               key="invitation-interface"
@@ -511,57 +507,57 @@ const StayBuddyCard = ({ color, i, progress, range, targetScale, theme }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.5 }}
-              style={{ 
-                height: '100%', 
-                display: 'flex', 
+              style={{
+                height: '100%',
+                display: 'flex',
                 flexDirection: 'column',
-                marginTop: '20px',
-                padding: isMobile ? '10px' : '20px'
+                marginTop: '15px',
+                padding: '0px'
               }}
             >
-              <h2 style={{ 
-                textAlign: 'center', 
-                margin: '0 0 20px 0', 
-                fontSize: isMobile ? '24px' : '32px', 
-                fontWeight: '800', 
-                color: theme === 'dark' ? '#ffffff' : '#000000' 
+              <h2 style={{
+                textAlign: 'center',
+                margin: '10px 0 10px 0',
+                fontSize: isMobile ? '24px' : '32px',
+                fontWeight: '800',
+                color: theme === 'dark' ? '#ffffff' : '#000000'
               }}>
                 Stay Buddy <span style={{ color: '#6366f1' }}>Invitations</span>
               </h2>
 
-              <div style={{ 
+              <div style={{
                 flex: 1,
-                display: 'flex', 
-                flexDirection: isMobile ? 'column' : 'row', 
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
                 gap: isMobile ? '20px' : '40px',
                 minHeight: '0',
                 paddingBottom: '20px'
               }}>
-                <InvitationSection 
-                  title="Send Invitation" 
-                  data={sendInvitations} 
-                  type="send" 
-                  onAction={handleSendInvitation} 
+                <InvitationSection
+                  title="Send Invitation"
+                  data={sendInvitations}
+                  type="send"
+                  onAction={handleSendInvitation}
                 />
-                
+
                 {!isMobile && (
-                  <div style={{ 
-                    width: '1px', 
+                  <div style={{
+                    width: '1px',
                     background: theme === 'dark' ? '#475569' : '#e2e8f0',
                     margin: '0 10px'
                   }} />
                 )}
-                
-                <InvitationSection 
-                  title="Accept Invitation" 
-                  data={acceptInvitations} 
-                  type="accept" 
-                  onAction={handleAcceptInvitation} 
+
+                <InvitationSection
+                  title="Accept Invitation"
+                  data={acceptInvitations}
+                  type="accept"
+                  onAction={handleAcceptInvitation}
                 />
               </div>
             </motion.div>
           )}
-          
+
           {showCurtain && <CurtainAnimation curtainType={curtainType} theme={theme} lottieSrc={lottieSrc} loadingText={loadingText} />}
         </AnimatePresence>
       </motion.div>

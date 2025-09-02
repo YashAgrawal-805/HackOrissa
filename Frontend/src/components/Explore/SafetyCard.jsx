@@ -119,7 +119,7 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
         borderRadius: '25px',
         padding: isMobile ? '20px' : '50px',
         display: 'flex',
-        flexDirection: 'column', // Set to column for proper stacking
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 20,
@@ -131,8 +131,8 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
         onClick={onBackToMain}
         style={{
           position: 'absolute',
-          top: '20px',
-          left: '20px',
+          top: isMobile ? '10px' : '20px',
+          left: isMobile ? '10px' : '20px',
           width: '40px',
           height: '40px',
           borderRadius: '50%',
@@ -148,13 +148,15 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
           zIndex: 30
         }}
       >
-        ←
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: theme === 'dark' ? '#ffffff' : '#000000' }}>
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
       </motion.button>
-      
+
       {/* Centered Heading */}
       <h2 style={{
         textAlign: 'center',
-        margin: '0 0 40px 0',
+        margin: '20px 0 30px 0',
         fontSize: isMobile ? '28px' : '36px',
         fontWeight: '800',
       }}>
@@ -176,7 +178,7 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
           flex: isMobile ? 'none' : 1,
           display: 'flex',
           flexDirection: 'column',
-          gap: '20px',
+          gap: isMobile ?  '10px' : '15px',
           width: isMobile ? '100%' : '50%',
           paddingRight: isMobile ? '0' : '40px',
         }}>
@@ -200,7 +202,7 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
               whileFocus={{ boxShadow: '0 0 0 3px #6366f1, 0 0 0 6px rgba(99, 102, 241, 0.2)' }}
               style={{
                 width: '100%',
-                padding: '12px 20px',
+                padding: '12px 8px',
                 borderRadius: '12px',
                 border: theme === 'dark' ? '1px solid #475569' : '1px solid #c9d6e4', // Increased border contrast
                 background: theme === 'dark' ? '#1e293b' : '#f0f4f9', // Slightly darker background
@@ -328,7 +330,7 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
               {showMemberInput ? 'Cancel' : 'Add Member'}
             </motion.button>
           </div>
-          
+
           {/* Select Radius */}
           <div style={{
             display: 'flex',
@@ -430,7 +432,7 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Right side: Lottie Animation and Button */}
         <div style={{
           flex: 1,
@@ -454,6 +456,8 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
             onClick={() => console.log('Group created!')}
             style={{
               marginTop: '20px',
+              marginBottom:'20px',
+
               padding: '14px 28px',
               borderRadius: '50px',
               background: '#6366f1',
@@ -614,8 +618,8 @@ const ExistingGroupInterface = ({ theme, onBackToMain, isMobile }) => {
         onClick={onBackToMain}
         style={{
           position: 'absolute',
-          top: '20px',
-          left: '20px',
+          top: isMobile ? '10px' : '20px',
+          left: isMobile ? '10px' : '20px',
           width: '40px',
           height: '40px',
           borderRadius: '50%',
@@ -631,15 +635,17 @@ const ExistingGroupInterface = ({ theme, onBackToMain, isMobile }) => {
           zIndex: 30
         }}
       >
-        ←
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: theme === 'dark' ? '#ffffff' : '#000000' }}>
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
       </motion.button>
-      
+
       <h2 style={{
         textAlign: 'center',
         margin: '0 0 40px 0',
         fontSize: isMobile ? '28px' : '36px',
         fontWeight: '800',
-        marginTop: isMobile ? '60px' : '0'
+        marginTop: isMobile ? '15px' : '0'
       }}>
         <span style={{ color: '#6366f1' }}>Existing </span>
         <span style={{ color: theme === 'dark' ? '#ffffff' : '#000000' }}>Groups</span>
@@ -673,7 +679,6 @@ const ExistingGroupInterface = ({ theme, onBackToMain, isMobile }) => {
     </motion.div>
   );
 };
-
 
 const SafetyCard = ({ color, i, progress, range, targetScale, theme }) => {
   const container = useRef(null);
@@ -760,12 +765,12 @@ const SafetyCard = ({ color, i, progress, range, targetScale, theme }) => {
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          height: isMobile ? 'auto' : '500px',
+          height: isMobile ? '80vh' : '500px',
           minHeight: '500px',
           width: '1000px',
           maxWidth: '90vw',
           borderRadius: '25px',
-          padding: !showGroupInterface && !showExistingGroupUI && !showCurtain ? (isMobile ? '24px' : '50px') : '0',
+          padding: '24px',
           background:
             theme === 'dark'
               ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%)'
@@ -799,14 +804,14 @@ const SafetyCard = ({ color, i, progress, range, targetScale, theme }) => {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: isMobile ? '24px' : '50px'
+                padding: '50px'
               }}
             >
               <h2
                 style={{
                   textAlign: 'center',
                   margin: '0 0 20px 0',
-                  fontSize: isMobile ? '28px' : '42px',
+                  fontSize: isMobile ? '24px' : '42px',
                   fontWeight: '800'
                 }}
               >
@@ -815,14 +820,16 @@ const SafetyCard = ({ color, i, progress, range, targetScale, theme }) => {
                 </span>
                 <span style={{ color: '#6366f1' }}>Stay Safe</span>
               </h2>
-
               <div
                 style={{
                   display: 'flex',
                   flexDirection: isMobile ? 'column' : 'row',
-                  gap: isMobile ? '16px' : '50px',
+                  gap: isMobile ? '24px' : '50px',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  marginTop: 'auto',
+                  marginBottom: 'auto'
                 }}
               >
                 {isMobile ? (
@@ -831,13 +838,16 @@ const SafetyCard = ({ color, i, progress, range, targetScale, theme }) => {
                       carouselImages={carouselImages}
                       currentImageIndex={currentImageIndex}
                       imageScale={imageScale}
+                      
                     />
                     <p
                       style={{
-                        fontSize: isMobile ? '16px' : '19px',
+                        fontSize: '14px',
                         color: theme === 'dark' ? '#e2e8f0' : '#374151',
                         textAlign: 'center',
-                        maxWidth: '100%'
+                        maxWidth: '100%',
+                        padding: '0 0px',
+                        margin: '0'
                       }}
                     >
                       You can add your friends to a group and during the whole journey

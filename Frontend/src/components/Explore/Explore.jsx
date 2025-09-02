@@ -27,7 +27,7 @@ const Explore = ({ theme, setTheme }) => {
 
       <ExpNavbar theme={theme} setTheme={setTheme} />
       <HeroAnimation theme={theme} />
-      <Heading theme={theme}/>
+      
       <CardsParallaxAnimation theme={theme} />
        <Footer /> 
     </div>

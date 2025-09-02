@@ -1,18 +1,17 @@
-// tripplannercard.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ImageCarousel, TripButtons } from './parallex';
 
-const PlaceCard = ({ place, theme, onAdd, isAdded }) => (
+const PlaceCard = ({ place, theme, onAdd, isAdded, isMobile }) => (
   <motion.div
     whileHover={{ scale: 1.02, y: -2 }}
     whileTap={{ scale: 0.98 }}
     style={{
       width: '100%',
-      maxWidth: '220px',
-      minWidth: '160px',
-      height: '260px',
+      maxWidth: isMobile ? '250px' : '220px', // Responsive width
+      minWidth: isMobile ? '140px' : '160px', // Responsive min-width
+      height: isMobile ? '220px' : '260px', // Responsive height
       borderRadius: '16px',
       background: theme === 'dark'
         ? 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)'
@@ -31,7 +30,7 @@ const PlaceCard = ({ place, theme, onAdd, isAdded }) => (
   >
     <div style={{
       width: '100%',
-      height: '140px',
+      height: isMobile ? '100px' : '140px', // Responsive image height
       borderRadius: '12px',
       overflow: 'hidden',
       marginBottom: '10px'
@@ -48,7 +47,7 @@ const PlaceCard = ({ place, theme, onAdd, isAdded }) => (
     </div>
 
     <h3 style={{
-      fontSize: '16px',
+      fontSize: isMobile ? '14px' : '16px', // Responsive font size
       fontWeight: '600',
       color: theme === 'dark' ? '#ffffff' : '#374151',
       margin: '0 0 10px 0',
@@ -106,7 +105,7 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
 
   const positionedPlaces = selectedPlaces.map((place, index) => {
     const numPlaces = selectedPlaces.length;
-    const paddingX = mapContainerSize.width * 0.15;
+    const paddingX = mapContainerSize.width * 0.1; // Reduced horizontal padding for wider path
     const paddingY = mapContainerSize.height * 0.2;
     const availableWidth = mapContainerSize.width - 2 * paddingX;
     const availableHeight = mapContainerSize.height - 2 * paddingY;
@@ -115,8 +114,20 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
       ? mapContainerSize.width / 2
       : paddingX + (availableWidth * (index / (numPlaces - 1)));
 
-    const yOscillation = Math.sin(index * Math.PI / Math.max(1, numPlaces - 1)) * (availableHeight * 0.15);
-    const y = mapContainerSize.height / 2 + (index % 2 === 0 ? yOscillation : -yOscillation);
+    // Increased y-oscillation for more pronounced zigzag
+    const baseYOscillation = availableHeight * 0.25; // More vertical displacement
+    let y = mapContainerSize.height / 2;
+
+    if (numPlaces > 1) {
+      if (index === 0) { // Start point higher
+        y = mapContainerSize.height / 2 - baseYOscillation * 0.8; 
+      } else if (index === numPlaces - 1) { // End point lower
+        y = mapContainerSize.height / 2 + baseYOscillation * 0.8;
+      } else { // Waypoints zigzag
+        y += Math.sin(index * Math.PI / (numPlaces - 1) * 2) * baseYOscillation * (index % 2 === 0 ? 1 : -1);
+      }
+    }
+    
 
     return { ...place, x, y };
   });
@@ -173,8 +184,8 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
         onClick={onBackToPlaceSelection}
         style={{
           position: 'absolute',
-          top: '20px',
-          left: '20px',
+          top: isMobile ? '10px' : '20px', // Responsive positioning
+          left: isMobile ? '10px' : '20px', // Responsive positioning
           width: '40px',
           height: '40px',
           borderRadius: '50%',
@@ -190,18 +201,20 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
           zIndex: 30
         }}
       >
-        ←
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: theme === 'dark' ? '#ffffff' : '#000000' }}>
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </motion.button>
 
       <div style={{
         textAlign: 'center',
         marginBottom: '20px',
-        marginTop: '60px',
+        marginTop: isMobile ? '40px' : '60px', // Responsive margin-top
         width: '100%',
         flexShrink: 0
       }}>
         <h2 style={{
-          fontSize: isMobile ? '24px' : '32px',
+          fontSize: isMobile ? '24px' : '32px', // Responsive font size
           fontWeight: '700',
           color: theme === 'dark' ? '#ffffff' : '#374151',
           margin: '0'
@@ -209,7 +222,7 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
           Your Event Plan
         </h2>
         <p style={{
-          fontSize: isMobile ? '14px' : '16px',
+          fontSize: isMobile ? '14px' : '16px', // Responsive font size
           color: theme === 'dark' ? '#e2e8f0' : '#6b7280',
           margin: '8px 0 0 0'
         }}>
@@ -221,8 +234,8 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
         ref={mapRef}
         style={{
           position: 'relative',
-          width: 'calc(100% - 40px)',
-          height: isMobile ? '300px' : '400px',
+          width: isMobile ? 'calc(100% - 20px)' : 'calc(100% - 40px)', // E D I T E D
+          height: isMobile ? '40vh' : '400px',
           maxWidth: '900px',
           background: theme === 'dark'
             ? 'rgba(30, 41, 59, 0.3)'
@@ -292,8 +305,8 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
               fontSize: isMobile ? '30px' : '40px',
               lineHeight: '1',
               color: index === 0 ? '#10b981' :
-                     index === positionedPlaces.length - 1 ? '#ef4444' :
-                     '#6366f1',
+                index === positionedPlaces.length - 1 ? '#ef4444' :
+                '#6366f1',
             }}>
               📍
             </div>
@@ -322,7 +335,7 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
       <div style={{
         display: 'flex',
         justifyContent: 'center',
-        gap: isMobile ? '15px' : '30px',
+        gap: isMobile ? '10px' : '30px', // Responsive gap
         marginTop: 'auto',
         flexWrap: 'wrap',
         flexShrink: 0,
@@ -387,7 +400,7 @@ const PlaceSelectionInterface = ({ theme, onBack, onCreatePlan, isMobile }) => {
           ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%)'
           : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 75%, #cbd5e1 100%)',
         borderRadius: '25px',
-        padding: isMobile ? '16px' : '24px',
+        padding: isMobile ? '16px' : '24px', // Responsive padding
         display: 'flex',
         flexDirection: 'column',
         zIndex: 20
@@ -399,8 +412,8 @@ const PlaceSelectionInterface = ({ theme, onBack, onCreatePlan, isMobile }) => {
         onClick={onBack}
         style={{
           position: 'absolute',
-          top: '20px',
-          left: '20px',
+          top: isMobile ? '10px' : '20px', // Responsive positioning
+          left: isMobile ? '10px' : '20px', // Responsive positioning
           width: '40px',
           height: '40px',
           borderRadius: '50%',
@@ -416,7 +429,9 @@ const PlaceSelectionInterface = ({ theme, onBack, onCreatePlan, isMobile }) => {
           zIndex: 30
         }}
       >
-        ←
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: theme === 'dark' ? '#ffffff' : '#000000' }}>
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </motion.button>
 
       <motion.button
@@ -426,8 +441,8 @@ const PlaceSelectionInterface = ({ theme, onBack, onCreatePlan, isMobile }) => {
         disabled={selectedPlaces.length === 0}
         style={{
           position: 'absolute',
-          bottom: '20px',
-          right: '20px',
+          bottom: isMobile ? '10px' : '20px', // Responsive positioning
+          right: isMobile ? '10px' : '20px', // Responsive positioning
           padding: '12px 24px',
           borderRadius: '25px',
           background: selectedPlaces.length > 0 ? '#6366f1' : '#94a3b8',
@@ -448,11 +463,11 @@ const PlaceSelectionInterface = ({ theme, onBack, onCreatePlan, isMobile }) => {
 
       <div style={{
         textAlign: 'center',
-        marginBottom: isMobile ? '20px' : '30px',
+        marginBottom: isMobile ? '20px' : '30px', // Responsive margin
         marginTop: '60px'
       }}>
         <h2 style={{
-          fontSize: isMobile ? '24px' : '32px',
+          fontSize: isMobile ? '24px' : '32px', // Responsive font size
           fontWeight: '700',
           color: theme === 'dark' ? '#ffffff' : '#374151',
           margin: '0'
@@ -481,9 +496,9 @@ const PlaceSelectionInterface = ({ theme, onBack, onCreatePlan, isMobile }) => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: isMobile
-            ? 'repeat(auto-fit, minmax(160px, 1fr))'
+            ? 'repeat(auto-fit, minmax(140px, 1fr))' // Responsive grid columns
             : 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: isMobile ? '16px' : '20px',
+          gap: isMobile ? '12px' : '20px', // Responsive gap
           padding: '0 16px',
           justifyItems: 'center'
         }}>
@@ -494,6 +509,7 @@ const PlaceSelectionInterface = ({ theme, onBack, onCreatePlan, isMobile }) => {
               theme={theme}
               onAdd={handleAddPlace}
               isAdded={selectedPlaces.find(p => p.id === place.id)}
+              isMobile={isMobile}
             />
           ))}
         </div>
@@ -606,7 +622,7 @@ const TripPlannerCard = ({ color, i, progress, range, targetScale, theme }) => {
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          height: '500px',
+          height: isMobile ? '80vh' : '500px',
           minHeight: '500px',
           width: '1000px',
           maxWidth: '90vw',
@@ -646,13 +662,13 @@ const TripPlannerCard = ({ color, i, progress, range, targetScale, theme }) => {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: isMobile ? '24px' : '50px'
+                padding:'50px'
               }}
             >
               <h2
                 style={{
                   textAlign: 'center',
-                  margin: '0 0 20px 0',
+                  margin: '15px 0 10px 0',
                   fontSize: isMobile ? '28px' : '42px',
                   fontWeight: '800'
                 }}
@@ -666,9 +682,12 @@ const TripPlannerCard = ({ color, i, progress, range, targetScale, theme }) => {
                 style={{
                   display: 'flex',
                   flexDirection: isMobile ? 'column' : 'row',
-                  gap: isMobile ? '16px' : '50px',
+                  gap: isMobile ? '24px' : '50px',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  marginTop: 'auto',
+                  marginBottom: 'auto'
                 }}
               >
                 {isMobile ? (
@@ -680,10 +699,12 @@ const TripPlannerCard = ({ color, i, progress, range, targetScale, theme }) => {
                     />
                     <p
                       style={{
-                        fontSize: isMobile ? '16px' : '19px',
+                        fontSize: '14px',
                         color: theme === 'dark' ? '#e2e8f0' : '#374151',
                         textAlign: 'center',
-                        maxWidth: '100%'
+                        maxWidth: '100%',
+                        padding: '0 0px 0 10px',
+                        margin: '0'
                       }}
                     >
                       Plan the trip by just selecting the location you want to travel,

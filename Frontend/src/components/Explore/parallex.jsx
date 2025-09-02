@@ -120,7 +120,7 @@ export const TripButtons = ({ handleButtonClick, theme }) => (
 );
 
 export const SafetyButtons = ({ handleButtonClick, theme }) => (
-  <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+  <div style={{ display: 'flex', gap: '16px', marginTop: '10px', marginBottom:"10px" }}>
     <motion.button 
       whileHover={{ scale: 1.05, y: -2 }}
       whileTap={{ scale: 0.95 }}
