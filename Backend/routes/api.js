@@ -644,24 +644,34 @@ router.post("/send-solo-request", authenticateToken, async (req, res) => {
 
     if (!toUserId) return res.status(400).json({ error: "Missing toUserId" });
 
-    // save request in Firestore
-    await db.collection("soloRequests").add({
+    // 1️⃣ Save request in Firestore (soloRequests collection)
+    const requestRef = await db.collection("soloRequests").add({
       from: fromUserId,
       to: toUserId,
       status: "pending",
-      createdAt: new Date(),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // notify user B in real-time
+    const requestId = requestRef.id;
+
+    // 2️⃣ Update the sender's user document (store sent request IDs)
+    const userRef = db.collection("users").doc(fromUserId);
+    await userRef.update({
+      sentSoloRequests: admin.firestore.FieldValue.arrayUnion(toUserId), // store userId
+    });
+
+    // 3️⃣ Notify user B in real-time if online
     const socketId = req.io.onlineUsers?.get(toUserId);
     if (socketId) {
       req.io.to(socketId).emit("soloRequestReceived", {
         from: fromUserId,
+        requestId,
         message: "You have a new solo request!",
       });
     }
 
-    res.json({ message: "Request sent successfully" });
+    res.json({ message: "Request sent successfully", requestId });
+
   } catch (err) {
     console.error("Error sending request:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -685,18 +695,31 @@ router.post("/accept-solo-request", authenticateToken, async (req, res) => {
       return res.status(403).json({ error: "Not authorized to accept this request" });
     }
 
-    // update request status
+    // 1️⃣ Update request status
     await reqRef.update({ status: "accepted" });
 
-    // fetch both users contact
+    // 2️⃣ Fetch both users contact
     const fromUserRef = db.collection("users").doc(requestData.from);
     const toUserRef = db.collection("users").doc(requestData.to);
 
-    const [fromUserSnap, toUserSnap] = await Promise.all([fromUserRef.get(), toUserRef.get()]);
+    const [fromUserSnap, toUserSnap] = await Promise.all([
+      fromUserRef.get(),
+      toUserRef.get(),
+    ]);
     const fromUser = fromUserSnap.data();
     const toUser = toUserSnap.data();
 
-    // notify both users with contact info
+    // 3️⃣ Update both users with "acceptedSoloRequests"
+    await Promise.all([
+      fromUserRef.update({
+        acceptedSoloRequests: admin.firestore.FieldValue.arrayUnion(requestData.to),
+      }),
+      toUserRef.update({
+        acceptedSoloRequests: admin.firestore.FieldValue.arrayUnion(requestData.from),
+      }),
+    ]);
+
+    // 4️⃣ Notify both users with contact info
     const fromSocket = req.io.onlineUsers?.get(requestData.from);
     if (fromSocket) {
       req.io.to(fromSocket).emit("soloRequestAccepted", {
@@ -719,6 +742,132 @@ router.post("/accept-solo-request", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+
+
+router.get("/find_restaurants", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    // 1️⃣ Fetch user doc
+    const userDoc = await db.collection("users").doc(userId).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const userData = userDoc.data();
+    if (!userData.lastLocation || !userData.lastLocation.latitude || !userData.lastLocation.longitude) {
+      return res.status(400).json({ error: "User location not available" });
+    }
+
+    const userLocation = {
+      latitude: Number(userData.lastLocation.latitude),
+      longitude: Number(userData.lastLocation.longitude),
+    };
+
+    // 2️⃣ Fetch all restaurants
+    const snapshot = await db.collection("restaurants").get();
+    if (snapshot.empty) {
+      return res.status(404).json({ message: "No restaurants found" });
+    }
+
+    const nearbyRestaurants = [];
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      if (data.lat && data.lng) {
+        const restaurantLocation = {
+          latitude: Number(data.lat),
+          longitude: Number(data.lng),
+        };
+
+        const distance = geolib.getDistance(userLocation, restaurantLocation); // meters
+
+        if (distance <= 10000) { // within 10 km
+          nearbyRestaurants.push({
+            id: doc.id,
+            ...data,
+            distance: (distance / 1000).toFixed(2) + " km",
+          });
+        }
+      }
+    });
+
+    // 3️⃣ Sort by distance (nearest first)
+    nearbyRestaurants.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+
+    res.json({
+      message: "Nearby restaurants fetched successfully",
+      userLocation,
+      restaurants: nearbyRestaurants,
+    });
+
+  } catch (err) {
+    console.error("Error finding restaurants:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
+// 1️⃣ See all users to whom the logged-in user has sent requests
+router.get("/my-sent-solo-requests", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const sentSnap = await db
+      .collection("soloRequests")
+      .where("from", "==", userId)
+      .get();
+
+    if (sentSnap.empty) {
+      return res.json({ message: "No sent requests", sent: [] });
+    }
+
+    const sentRequests = sentSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.json({ message: "Fetched sent requests", sent: sentRequests });
+  } catch (err) {
+    console.error("Error fetching sent requests:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// 2️⃣ See all users who have sent requests to the logged-in user
+router.get("/my-received-solo-requests", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const recvSnap = await db
+      .collection("soloRequests")
+      .where("to", "==", userId)
+      .get();
+
+    if (recvSnap.empty) {
+      return res.json({ message: "No received requests", received: [] });
+    }
+
+    const receivedRequests = recvSnap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.json({ message: "Fetched received requests", received: receivedRequests });
+  } catch (err) {
+    console.error("Error fetching received requests:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 
 
