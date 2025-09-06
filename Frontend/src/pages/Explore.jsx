@@ -1,10 +1,10 @@
 import React from "react";
-import VantaNetBackground from "../../Utilities/bg";     
-import ExpNavbar from "../Explore/expNavbar"; // navbar
-import Footer from "../Footer";             // optional: if you have a footer
-import HeroAnimation from "../Explore/HeroAnimation";
-import CardsParallaxAnimation from "../Explore/parallex";
-import Heading from "../Explore/Heading";
+   
+import ExpNavbar from "../components/Explore/expNavbar"; // navbar
+import Footer from "../components/Footer";             // optional: if you have a footer
+import HeroAnimation from "../components/Explore/HeroAnimation";
+import CardsParallaxAnimation from "../components/Explore/parallex";
+
 const Explore = ({ theme, setTheme }) => {
   // pick grid color depending on theme
   const gridColor =

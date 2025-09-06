@@ -1,9 +1,9 @@
 // src/components/cards/StayBuddyCard.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
-import ImageCarousel from '../../../Utilities/ImageCarousel';
+import ImageCarousel from '../../../utility/ImageCarousel';
 import StayBuddyButtons from '../buttons/StayBuddyButtons';
-import CurtainAnimation from '../../../Utilities/CurtainAnimation';
+import CurtainAnimation from '../../../utility/CurtainAnimation';
 import InvitationInterface from '../interfaces/InvitationInterface';
 import FriendsList from '../interfaces/FriendsList';
 

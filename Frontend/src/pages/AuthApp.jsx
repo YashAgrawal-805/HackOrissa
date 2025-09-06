@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import "../auth/styles.css";
-import SignInForm from "../auth/Signin";
-import SignUpForm from "../auth/SignUp";
-import VantaNetBackground from "../../Utilities/bgAuth";
+import "../components/auth/styles.css";
+import SignInForm from "../components/auth/Signin";
+import SignUpForm from "../components/auth/SignUp";
+import VantaNetBackground from "../utility/bgAuth";
 
 const AuthApp = ({ theme }) => {
   const [type, setType] = useState("signIn");

@@ -1,9 +1,9 @@
 // src/components/cards/TripPlannerCard.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
-import ImageCarousel from '../../../Utilities/ImageCarousel';
+import ImageCarousel from '../../../utility/ImageCarousel';
 import TripPlannerButtons from '../buttons/TripPlannerButtons';
-import CurtainAnimation from '../../../Utilities/CurtainAnimation';
+import CurtainAnimation from '../../../utility/CurtainAnimation';
 import PlaceSelectionInterface from '../interfaces/PlaceSelectionInterface';
 import EventPlanInterface from '../interfaces/EventPlanInterface';
 
