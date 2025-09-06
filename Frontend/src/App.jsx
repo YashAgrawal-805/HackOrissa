@@ -1,37 +1,10 @@
+// src/app.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Services from './components/Services';
-import Teams from './components/team';
-import VantaNetBackground from './components/bg';
-import ContactUs from './components/ContactUs';
 import { Toaster } from 'react-hot-toast';
-import Footer from './components/Footer';
-import AuthApp from './components/auth/AuthApp';
-import Explore from './components/explore/Explore'; // 👈 import Explore
-
-const MainPage = ({ theme, setTheme, dotRef, outlineRef }) => {
-  return (
-    <>
-      <VantaNetBackground theme={theme} />
-      <Navbar theme={theme} setTheme={setTheme} />
-      <Hero />
-      <Services />
-      <Teams />
-      <ContactUs />
-      <Footer theme={theme} />
-    </>
-  );
-};
-// const Auth = ({ theme }) => {
-//   return (
-//     <div className="relative h-[2000px] items-center justify-center overflow-y-hidden">
-//       {/* Fullscreen Vanta Background */}
-//       <VantaNetBackground theme={theme} />
-//     </div>
-//   );
-// };
+import AuthApp from './components/pages/AuthApp';
+import Explore from './components/pages/Explore';
+import MainPage from './components/pages/MainPage'; 
 
 const App = () => {
   const [theme, setTheme] = useState('light');
@@ -81,13 +54,11 @@ const App = () => {
               <MainPage 
                 theme={theme} 
                 setTheme={setTheme} 
-                dotRef={dotRef} 
-                outlineRef={outlineRef} 
               />
             } 
           />
-         <Route path="/auth" element={<AuthApp theme={theme} />} />
-         <Route path="/explore" element={<Explore theme={theme} setTheme={setTheme} />} /> {/* 👈 pass theme props */}
+          <Route path="/auth" element={<AuthApp theme={theme} />} />
+          <Route path="/explore" element={<Explore theme={theme} setTheme={setTheme} />} />
         </Routes>
 
         {/* Custom Cursor Ring */}

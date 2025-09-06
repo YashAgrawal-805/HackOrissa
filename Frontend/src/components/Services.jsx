@@ -1,7 +1,7 @@
 import React from 'react'
 import assets from '../assets/assets'
-import Title from './Title'
-import ServiceCard from './ServiceCard'
+import Title from './Utilities/Title'
+import ServiceCard from './Utilities/ServiceCard'
 import { motion } from "framer-motion";
 
 const Services = () => {

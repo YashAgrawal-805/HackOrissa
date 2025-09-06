@@ -76,31 +76,13 @@ const ShopCard = ({ name, photo, special, address }) => {
           <p className="text-white/70 text-sm leading-relaxed">{address}</p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
-          <button className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white py-2 px-3 rounded-xl font-medium text-sm transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
-            View Menu
-          </button>
-          <button className="flex-1 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 text-white py-2 px-3 rounded-xl font-medium text-sm transition-all duration-200">
+        {/* Action Button */}
+        <div className="pt-2">
+          <button className="w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 text-white py-2 px-3 rounded-xl font-medium text-sm transition-all duration-200">
             Directions
           </button>
         </div>
 
-        {/* Delivery Info */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/10">
-          <div className="flex items-center gap-1">
-            <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span className="text-xs text-green-400 font-medium">15-20 min</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-            </svg>
-            <span className="text-xs text-yellow-400 font-medium">Free delivery</span>
-          </div>
-        </div>
       </div>
     </div>
   );

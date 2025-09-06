@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import Title from './Title'
+import Title from './Utilities/Title'
 import assets from '../assets/assets'
 import toast from 'react-hot-toast'
 import { motion } from "framer-motion";

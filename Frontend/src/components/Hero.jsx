@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import assets from '../assets/assets';
-import ShopCard from './ShopCard';
+import ShopCard from './Utilities/ShopCard';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -80,19 +80,17 @@ const Hero = () => {
       {/* buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
         <motion.button
-  onClick={() => navigate('/explore')} // 👈 added navigate
-  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-shadow shadow-lg"
-  initial={{ opacity: 0, y: 20 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ delay: 0.2, duration: 0.5 }}
-  whileHover={{ scale: 1.08, rotate: 2 }}
-  whileTap={{ scale: 0.95, rotate: -2 }}
-  viewport={{ once: true }}
->
-  Explore
-</motion.button>
-
-
+          onClick={() => navigate('/explore')} // 👈 added navigate
+          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-shadow shadow-lg"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          whileHover={{ scale: 1.08, rotate: 2 }}
+          whileTap={{ scale: 0.95, rotate: -2 }}
+          viewport={{ once: true }}
+        >
+          Explore
+        </motion.button>
         <motion.button
           onClick={handleSignupClick}
           className="bg-transparent border-2 border-blue-600 text-blue-600 dark:text-blue-400 px-8 py-3 rounded-xl font-semibold transition-shadow shadow-lg cursor-pointer"
@@ -160,16 +158,6 @@ const Hero = () => {
               >
                 {/* Glassmorphism Header */}
                 <div className="relative bg-gradient-to-r from-blue-400/10 via-blue-500/10 to-indigo-600/10 backdrop-blur-xl border-b border-white/10 p-6 flex-shrink-0 rounded-t-3xl">
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-all duration-200 group"
-                  >
-                    <svg className="w-4 h-4 text-white group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-
                   {/* Header Content */}
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center shadow-lg">
@@ -210,19 +198,16 @@ const Hero = () => {
                       {/* Stats Bar - Fixed */}
                       <div className="flex-shrink-0 px-6 py-4">
                         <div className="flex justify-between items-center p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
-                          <div className="text-center">
+                          {/* Location */}
+                          <div className="flex-1 text-left pr-4">
+                            <div className="text-xs text-white/60">Location</div>
+                            <div className="text-lg font-bold text-white truncate">City Center</div>
+                          </div>
+                          <div className="w-px h-8 bg-white/20"></div>
+                          {/* Restaurants Count */}
+                          <div className="flex-shrink-0 text-center pl-4">
                             <div className="text-2xl font-bold text-white">{shops.length}</div>
                             <div className="text-xs text-white/60">Restaurants</div>
-                          </div>
-                          <div className="w-px h-8 bg-white/20"></div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-green-400">4.8</div>
-                            <div className="text-xs text-white/60">Avg Rating</div>
-                          </div>
-                          <div className="w-px h-8 bg-white/20"></div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-400">15m</div>
-                            <div className="text-xs text-white/60">Avg Delivery</div>
                           </div>
                         </div>
                       </div>
