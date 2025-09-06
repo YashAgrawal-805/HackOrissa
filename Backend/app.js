@@ -16,17 +16,19 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   },
 });
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend URL
+    origin: ["http://localhost:5173", "http://localhost:5174"], // frontend URL
     credentials: true, // 👈 allow cookies
   })
 );
-
+io.on("connection_error", (err) => {
+  console.log("Connection error:", err.message);
+});
 // Middleware
 app.use(cookieParser());
 app.use(express.json());
@@ -38,6 +40,7 @@ app.use(
   })
 );
 app.use((req, res, next) => {
+  console.log("New request:");
   req.io = io;
   next();
 });

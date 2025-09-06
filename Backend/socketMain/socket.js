@@ -24,7 +24,7 @@
 const socketEvents = require("../routes/socketRoute");
 
 const liveTracking = (io, db) => {
-  const onlineUsers = new Map();
+  global.onlineUsers = new Map();
 
   io.on("connection", (socket) => {
     console.log("✅ Client connected:", socket.id);
