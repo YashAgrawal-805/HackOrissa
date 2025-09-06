@@ -1,5 +1,5 @@
 import React from "react";
-import VantaNetBackground from "../Utilities/bg";     
+import VantaNetBackground from "../../Utilities/bg";     
 import ExpNavbar from "../Explore/expNavbar"; // navbar
 import Footer from "../Footer";             // optional: if you have a footer
 import HeroAnimation from "../Explore/HeroAnimation";

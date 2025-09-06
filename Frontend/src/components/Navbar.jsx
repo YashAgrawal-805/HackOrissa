@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import assets from '../assets/assets'
-import ThemeToggleBtn from './Utilities/ThemeToggleBtn'
+import ThemeToggleBtn from '../Utilities/ThemeToggleBtn'
 import { motion } from "framer-motion";
 
 

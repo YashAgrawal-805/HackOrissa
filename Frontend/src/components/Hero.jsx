@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import assets from '../assets/assets';
-import ShopCard from './Utilities/ShopCard';
+import ShopCard from '../Utilities/ShopCard';
 
 const Hero = () => {
   const navigate = useNavigate();

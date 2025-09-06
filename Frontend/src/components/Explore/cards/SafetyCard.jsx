@@ -1,9 +1,9 @@
 // src/components/cards/SafetyCard.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
-import ImageCarousel from '../../Utilities/ImageCarousel';
+import ImageCarousel from '../../../Utilities/ImageCarousel';
 import SafetyButtons from '../buttons/SafetyButtons';
-import LottieCurtain from '../../Utilities/LottieCurtain';
+import LottieCurtain from '../../../Utilities/LottieCurtain';
 import GroupDetailsInterface from '../interfaces/GroupDetailsInterface';
 import ExistingGroupInterface from '../interfaces/ExistingGroupInterface';
 

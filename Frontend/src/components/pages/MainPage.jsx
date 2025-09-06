@@ -4,7 +4,7 @@ import Navbar from '../Navbar';
 import Hero from '../Hero';
 import Services from '../Services';
 import Team from '../team/team';
-import VantaNetBackground from '../Utilities/bg';
+import VantaNetBackground from '../../Utilities/bg';
 import ContactUs from '../ContactUs';
 import Footer from '../Footer';
 

@@ -1,9 +1,9 @@
 // src/components/cards/StayBuddyCard.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
-import ImageCarousel from '../../Utilities/ImageCarousel';
+import ImageCarousel from '../../../Utilities/ImageCarousel';
 import StayBuddyButtons from '../buttons/StayBuddyButtons';
-import CurtainAnimation from '../../Utilities/CurtainAnimation';
+import CurtainAnimation from '../../../Utilities/CurtainAnimation';
 import InvitationInterface from '../interfaces/InvitationInterface';
 import FriendsList from '../interfaces/FriendsList';
 
@@ -54,19 +54,7 @@ const StayBuddyCard = ({ i, progress, range, targetScale, theme }) => {
         setShowInvitationInterface(true);
       }, animationDuration);
     } else if (type === 'friend') {
-      // Try these potential file paths/names for friends lottie animation
-      // Option 1: Use the same lottie file as find (if you only have one)
       setLottieSrc('/staybuddy.lottie');
-      
-      // Option 2: Check if you have a friends-specific lottie file
-      // setLottieSrc('/friends.lottie');
-      
-      // Option 3: Use a different naming convention
-      // setLottieSrc('/friends_loading.json');
-      
-      // Option 4: Use an online lottie animation as fallback
-      // setLottieSrc('https://assets9.lottiefiles.com/packages/lf20_jcikwtux.json');
-      
       setLoadingText('Loading your friends list...');
       setTimeout(() => {
         setShowCurtain(false);
@@ -92,8 +80,8 @@ const StayBuddyCard = ({ i, progress, range, targetScale, theme }) => {
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          height: isMobile ? '80vh' : '500px',
-          minHeight: '500px',
+          // Removed fixed height and min-height for better mobile responsiveness
+          height: isMobile ? 'auto' : '500px', // 'auto' allows height to be determined by content
           width: '1000px',
           maxWidth: '90vw',
           borderRadius: '25px',
@@ -104,7 +92,9 @@ const StayBuddyCard = ({ i, progress, range, targetScale, theme }) => {
           transformOrigin: 'top',
           boxShadow: theme === 'dark' ? '0 15px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)' : '0 15px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)',
           overflow: 'hidden',
-          scale: showCurtain ? 1 : scale
+          scale: showCurtain ? 1 : scale,
+          // Added min-height for mobile to prevent card from being too small
+          minHeight: isMobile ? '60vh' : '500px', 
         }}
       >
         <AnimatePresence>
@@ -148,26 +138,41 @@ const StayBuddyCard = ({ i, progress, range, targetScale, theme }) => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
+                position: 'relative', // Changed from absolute to relative for better flow
                 width: '100%',
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: isMobile ? '24px' : '50px'
+                padding: isMobile ? '24px' : '50px',
+                // Added flex-grow to ensure content fills available space
+                flexGrow: 1
               }}
             >
               <h2 style={{ textAlign: 'center', margin: '0 0 20px 0', fontSize: isMobile ? '28px' : '42px', fontWeight: '800', color: theme === 'dark' ? '#ffffff' : '#000000' }}>
                 <span>Find Your </span><span style={{ color: '#6366f1' }}>Stay Buddy</span>
               </h2>
-              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '24px' : '50px', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: 'auto', marginBottom: 'auto' }}>
+              {/* This flex container is the main reason for the empty space on mobile */}
+              <div style={{
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: isMobile ? '24px' : '50px',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  // Removed margin 'auto' to prevent centering and empty space
+                  marginTop: '0', 
+                  marginBottom: '0', 
+                  // Added flex-grow to push content and fill space
+                  flexGrow: 1, 
+                  // Added min-height to ensure flex children have some space
+                  minHeight: '0',
+                }}>
                 {isMobile ? (
                   <>
                     <ImageCarousel carouselImages={carouselImages} currentImageIndex={currentImageIndex} imageScale={imageScale} />
-                    <p style={{ fontSize: '16px', color: theme === "dark" ? '#e2e8f0' : '#374151', textAlign: 'center', maxWidth: '100%', padding: '0 10px', margin: '0' }}>
+                    <p style={{ fontSize: '16px', color: theme === "dark" ? '#e2e8f0' : '#374151', textAlign: 'center', maxWidth: '100%', padding: '0 10px', margin: '0', marginTop: 'auto' }}>
                       Find your roommate or flatmate for the trip according to your convenience. Connect with like-minded travelers and make your journey memorable.
                     </p>
                     <StayBuddyButtons handleButtonClick={handleButtonClick} theme={theme} />
