@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import axios from 'axios';
 
 const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
   const [groupName, setGroupName] = useState('');
@@ -10,6 +11,7 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
   const [newMemberContact, setNewMemberContact] = useState('');
   const [isRadiusOpen, setIsRadiusOpen] = useState(false);
   const [selectedRadius, setSelectedRadius] = useState('1 km');
+   const [isLoading, setIsLoading] = useState(false);
 
   const radiusOptions = ['100 mt', '200 mt', '500 mt', '1 km', '2 km', '5 km', '10 km', '20 km'];
 
@@ -18,6 +20,49 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
       setMembers([...members, { name: newMemberContact, contact: newMemberContact }]);
       setNewMemberContact('');
       setShowMemberInput(false);
+    }
+  };
+
+    const handleCreateGroup = async () => {
+    if (!groupName || members.length === 0) {
+      alert("Please enter group name and add at least one member.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Collect all member phone numbers
+      const memberPhones = members.map(m => m.contact);
+      console.log("Member Phones:", memberPhones);
+
+      const token = localStorage.getItem("token");
+      console.log("Token:", token);
+
+      const res = await axios.post(
+        "http://localhost:3000/api/create-group", // adjust backend URL
+        {
+          groupName,
+          memberPhones,   // send phone numbers
+          subAdminPhone: null // can add UI for sub-admin later
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // backend uses authenticateToken
+          },
+        }
+      );
+
+      alert("✅ Group created successfully!");
+      console.log("Group Response:", res.data);
+
+      // Optional: reset form
+      setGroupName("");
+      setMembers([]);
+    } catch (err) {
+      console.error("Error creating group:", err);
+      alert("❌ Failed to create group");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -73,6 +118,8 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
         zIndex: 20,
       }}
     >
+
+
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -386,26 +433,29 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
             autoplay
             style={{ width: isMobile ? '70%' : '80%', height: 'auto', maxWidth: '400px' }}
           />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => console.log('Group created!')}
-            style={{
-              marginTop: '20px',
-              marginBottom: '20px',
-              padding: '14px 28px',
-              borderRadius: '50px',
-              background: '#6366f1',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: '600',
-              boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)'
-            }}
-          >
-            Create Group
-          </motion.button>
+         <motion.button
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={handleCreateGroup}   // ✅ Call the actual function
+  disabled={isLoading}
+  style={{
+    marginTop: '20px',
+    marginBottom: '20px',
+    padding: '14px 28px',
+    borderRadius: '50px',
+    background: '#6366f1',
+    color: '#fff',
+    border: 'none',
+    cursor: isLoading ? "not-allowed" : "pointer",
+    fontSize: '16px',
+    fontWeight: '600',
+    boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
+    opacity: isLoading ? 0.6 : 1
+  }}
+>
+  {isLoading ? "Creating..." : "Create Group"}
+</motion.button>
+
         </div>
       </div>
     </motion.div>

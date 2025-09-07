@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { initSocket, getSocket } from "../controllers/UseSocket";
 import SoS from "../controllers/SoS";
-import { addConnection, addSendRequest, removeSendRequest } from "../store/store";
+import {addAcceptedRequest, addConnection, addSendRequest, removeSendRequest } from "../store/store";
 import ExpNavbar from "../components/Explore/expNavbar";
 import Footer from "../components/Footer";
 import HeroAnimation from "../components/Explore/HeroAnimation";
@@ -66,14 +66,15 @@ const Explore = ({ theme, setTheme }) => {
     };
 
     const handleSoloRequestReceived = (data) => {
+      console.log("Solo request received:", data);
       dispatch(
-        addSendRequest({
+        addAcceptedRequest({
           id: data.from,
           name: data.username,
           distance: data.distance || null,
         })
       );
-      alert("Request Received from " + data.username);
+      alert("Request Received from " + data.from, data.username);
     };
 
     const handleSosAlert = (data) => {
@@ -92,13 +93,35 @@ const Explore = ({ theme, setTheme }) => {
           name: data.username,
         })
       );
-      alert("Request Accepted by " + data.username);
+      alert("Request Accepted by " + data.by);
     };
+    const handleNearbyNotification = (data) => {
+      alert(data.message);
+    }
 
+    const handleDistanceNotifications = (notifications) => {
+      if (Array.isArray(notifications) && notifications.length > 0) {
+        notifications.forEach((notification) => {
+          const { groupId, message } = notification;
+    
+          if (groupId && message) {
+            console.log(`Received notification for group ${groupId}: ${message}`);
+            alert(message); // You can replace alert with a custom UI component
+          } else {
+            console.error("Invalid notification format:", notification);
+          }
+        });
+      } else {
+        console.log("No notifications or invalid format received.");
+      }
+    }
+    
     socket.on("soloTravelerNearby", handleSoloTraveler);
     socket.on("soloRequestReceived", handleSoloRequestReceived);
     socket.on("sosAlert", handleSosAlert);
     socket.on("soloRequestAccepted", handleSoloRequestAccepted);
+    socket.on("nearbyNotification", handleNearbyNotification);
+    socket.on("distanceNotifications", handleDistanceNotifications);
 
     return () => {
       socket.off("soloTravelerNearby", handleSoloTraveler);

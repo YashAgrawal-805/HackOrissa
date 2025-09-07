@@ -5,7 +5,7 @@ import ToggleBtn from "./expToggle"; // reusable toggle button
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsTrack } from "../../store/store";  
+import { setIsSolo, setIsTrack } from "../../store/store";  
 import { setIsSOS } from "../../store/store";
 import { handleSoloTogelle } from "../../controllers/SoloTravellers";
 
@@ -34,6 +34,17 @@ const ExpNavbar = ({ theme, setTheme }) => {
         console.error("Error fetching tracking:", err);
       }
     };
+    const fetchSoloStatus = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/api/get-solo-status", {
+          withCredentials: true,
+        });
+        dispatch(setIsSolo(res.data.Issolo || false));
+      } catch (err) {
+        console.error("Error fetching solo status:", err);
+      }
+    };
+    fetchSoloStatus();
     fetchTracking();
   }, []);
 

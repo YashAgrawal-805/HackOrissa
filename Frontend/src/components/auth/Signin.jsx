@@ -27,6 +27,10 @@ function SignInForm() {
         { username, password },
         { withCredentials: true }
       );
+      if(response.data.error){
+        alert(response.data.error);
+        return;
+      }
       localStorage.setItem("token", response.data.token);
       navigate("/explore");
     } catch (err) {

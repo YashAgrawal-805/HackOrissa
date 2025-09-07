@@ -141,7 +141,8 @@ const InvitationInterface = ({ theme, isMobile , sendInvitations, acceptInvitati
   };
 
   const handleAcceptInvitation = (id) => {
-    handleAccept(id);
+    console.log("Accepting invitation for ID:", id);
+    handleAccept(id)();
     dispatch(removeAcceptedRequest(id));
     console.log(`Accepting invitation from ${id}`);
   };

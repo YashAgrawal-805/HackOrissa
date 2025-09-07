@@ -64,8 +64,8 @@ const appSlice = createSlice({
     addAcceptedRequest: (state, action) => {
       const data = action.payload;
       state.acceptedRequests.push({
-        id: data.from,
-        name: data.username,
+        id: data.id,
+        name: data.name,
       });
     },
     removeAcceptedRequest: (state, action) => {
