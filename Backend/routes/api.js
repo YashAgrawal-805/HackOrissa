@@ -91,15 +91,41 @@ router.post('/toggle-group-activation', authenticateToken, async (req, res) => {
 });
 
 
+router.get('/get-toggle-tracking', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userRef = db.collection('users').doc(userId);
+    const userSnap = await userRef.get();
+
+    if (!userSnap.exists) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const userData = userSnap.data();
+
+    res.json({
+      id: userId,
+      name: userData.name,
+      email: userData.email,
+      trackingEnabled: userData.trackingEnabled || false
+    });
+
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 
 
 //create group
-
 router.post('/create-group', authenticateToken, async (req, res) => {
   try {
+    console.log("Hi")
     const { groupName, subAdminPhone, memberPhones } = req.body;
     const adminPhone = req.user.phone;
-
+    console.log(adminPhone, groupName, memberPhones);
     if (!groupName || !adminPhone || !Array.isArray(memberPhones)) {
       return res.status(400).json({ error: 'Invalid request payload' });
     }
@@ -108,8 +134,10 @@ router.post('/create-group', authenticateToken, async (req, res) => {
 
     // Fetch admin
     const adminSnapshot = await usersRef.where('phone', '==', adminPhone).get();
+    console.log(adminSnapshot)
     if (adminSnapshot.empty) return res.status(404).json({ error: 'Admin not found' });
     const adminDoc = adminSnapshot.docs[0];
+    console.log('Admin ID:', adminDoc.id);
 
     // Fetch sub-admin (optional)
     let subAdminDoc = null;
@@ -121,10 +149,12 @@ router.post('/create-group', authenticateToken, async (req, res) => {
     // Fetch all members by phone
     const memberIds = [];
     for (const phone of memberPhones) {
-      const snapshot = await usersRef.where('phone', '==', phone).get();
+      const snapshot = await usersRef.where('phone', '==', Number(phone)).get();
+      console.log(snapshot)
       if (snapshot.empty) return res.status(404).json({ error: `User with phone ${phone} not found` });
       memberIds.push(snapshot.docs[0].id);
     }
+    console.log("dick")
     console.log('Member IDs:', memberIds);
     // Add admin and sub-admin to members list if not already there
     if (!memberIds.includes(adminDoc.id)) memberIds.push(adminDoc.id);
@@ -143,13 +173,31 @@ router.post('/create-group', authenticateToken, async (req, res) => {
     const groupRef = await db.collection('groups').add(groupData);
     const groupId = groupRef.id;
     console.log('New Group ID:', groupId);
-    // Update each member’s user document to store groupId
-    const updatePromises = memberIds.map(userId =>
-      usersRef.doc(userId).update({
-        groups: admin.firestore.FieldValue.arrayUnion(groupId)
-      })
-    );
-    await Promise.all(updatePromises);
+   // Update each member’s user document to store groupId
+const updatePromises = memberIds.map(userId =>
+  usersRef.doc(userId).update({
+    groups: admin.firestore.FieldValue.arrayUnion(groupId)
+  })
+);
+
+// ✅ Also update admin explicitly (in case they weren’t in memberIds)
+updatePromises.push(
+  usersRef.doc(adminDoc.id).update({
+    groups: admin.firestore.FieldValue.arrayUnion(groupId)
+  })
+);
+
+// ✅ If sub-admin exists, update them too
+if (subAdminDoc) {
+  updatePromises.push(
+    usersRef.doc(subAdminDoc.id).update({
+      groups: admin.firestore.FieldValue.arrayUnion(groupId)
+    })
+  );
+}
+
+await Promise.all(updatePromises);
+
 
      // ✅ Trigger socket event manually here
     req.io.emit("createGroup", { groupId, members: memberIds });
@@ -163,9 +211,6 @@ router.post('/create-group', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
-
 
 
 
@@ -282,7 +327,7 @@ router.post('/toggle-solo', authenticateToken, async (req, res) => {
 
     // 4️⃣ If solo enabled → check nearby solo travelers
     let nearbyUsers = [];
-    if (newStatus && userData.lastLocation) {
+    if (userData.lastLocation) {
       const usersRef = db.collection("users");
       const allUsersSnap = await usersRef.get();
 
@@ -590,7 +635,7 @@ router.get('/find-solo-travellers', authenticateToken, async (req, res) => {
           nearbyTravellers.push({
             id: doc.id,
             name: data.username,
-            phone: data.phone,
+            contact: data.phone,
             distance: Number(distance.toFixed(2))
           });
         }
@@ -614,31 +659,51 @@ router.get('/find-solo-travellers', authenticateToken, async (req, res) => {
 
 router.get('/see-groups', authenticateToken, async (req, res) => {
   try {
-    const userId = req.user.id; // userId from token
+    const userId = req.user.id;
 
-    // 1. Find the user
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     const userData = userDoc.data();
-
-    // 2. Check if groups field exists
     if (!userData.groups || userData.groups.length === 0) {
       return res.json({ message: 'User is not in any groups', groups: [] });
     }
 
-    // 3. Fetch all groups by their IDs (only groupId)
     const groupsData = [];
     for (const groupId of userData.groups) {
       const groupDoc = await db.collection('groups').doc(groupId).get();
       if (groupDoc.exists) {
-        groupsData.push(groupDoc.id); // ✅ store only groupId
+        const groupData = groupDoc.data();
+
+        // Fetch all members' names + contacts
+        const membersData = [];
+        if (groupData.members && groupData.members.length > 0) {
+          for (const memberId of groupData.members) {
+            const memberDoc = await db.collection('users').doc(memberId).get();
+            if (memberDoc.exists) {
+              const m = memberDoc.data();
+              membersData.push({
+                id: memberDoc.id,
+                name: m.username || "Unknown",
+                phone: m.phone || "N/A",
+              });
+            }
+          }
+        }
+
+       groupsData.push({
+  id: groupDoc.id,
+  name: groupData.groupName || "Unnamed Group",
+  admin: groupData.admin,
+  ISactive: groupData.ISactive || false,
+  members: membersData,
+});
+
       }
     }
 
-    // 4. Send response
     res.json({
       message: 'User groups fetched successfully',
       groups: groupsData
@@ -737,28 +802,30 @@ router.post("/accept-solo-request", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/find_restaurants", authenticateToken, async (req, res) => {
+router.get("/find_restaurants", async (req, res) => {
   try {
-    const userId = req.user.id;
+      const {lat, lng} = req.query;
+    console.log(lat,lng)
+    // const userId = req.user.id;
 
-    if (!userId) {
-      return res.status(400).json({ error: "Missing userId" });
-    }
+    // if (!userId) {
+    //   return res.status(400).json({ error: "Missing userId" });
+    // }
 
-    // 1️⃣ Fetch user doc
-    const userDoc = await db.collection("users").doc(userId).get();
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    // // 1️⃣ Fetch user doc
+    // const userDoc = await db.collection("users").doc(userId).get();
+    // if (!userDoc.exists) {
+    //   return res.status(404).json({ error: "User not found" });
+    // }
 
-    const userData = userDoc.data();
-    if (!userData.lastLocation || !userData.lastLocation.latitude || !userData.lastLocation.longitude) {
-      return res.status(400).json({ error: "User location not available" });
-    }
+    // const userData = userDoc.data();
+    // if (!userData.lastLocation || !userData.lastLocation.latitude || !userData.lastLocation.longitude) {
+    //   return res.status(400).json({ error: "User location not available" });
+    // }
 
     const userLocation = {
-      latitude: Number(userData.lastLocation.latitude),
-      longitude: Number(userData.lastLocation.longitude),
+      latitude: Number(lat),
+      longitude: Number(lng),
     };
 
     // 2️⃣ Fetch all restaurants
@@ -780,7 +847,7 @@ router.get("/find_restaurants", authenticateToken, async (req, res) => {
 
         const distance = geolib.getDistance(userLocation, restaurantLocation); // meters
 
-        if (distance <= 10000) { // within 10 km
+        if (distance <= 5000) { // within 10 km
           nearbyRestaurants.push({
             id: doc.id,
             ...data,
@@ -801,6 +868,33 @@ router.get("/find_restaurants", authenticateToken, async (req, res) => {
 
   } catch (err) {
     console.error("Error finding restaurants:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/get-solo-status", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    const userRef = db.collection("users").doc(userId);
+    const userSnap = await userRef.get();
+
+    if (!userSnap.exists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const userData = userSnap.data();
+
+    res.json({
+      message: "Fetched solo mode status successfully",
+      Issolo: userData.Issolo || false,
+    });
+  } catch (err) {
+    console.error("Error fetching solo mode status:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -839,20 +933,33 @@ router.get("/my-received-solo-requests", authenticateToken, async (req, res) => 
   try {
     const userId = req.user.id;
 
+    // ✅ Only fetch pending requests sent TO the user
     const recvSnap = await db
       .collection("soloRequests")
       .where("to", "==", userId)
+      .where("status", "==", "pending") // 👈 only pending
       .get();
 
     if (recvSnap.empty) {
       return res.json({ message: "No received requests", received: [] });
     }
 
-    const receivedRequests = recvSnap.docs.map((doc) => ({
-      id: doc.id,
-      name: doc.username,
-      ...doc.data(),
-    }));
+    const receivedRequests = await Promise.all(
+      recvSnap.docs.map(async (doc) => {
+        const reqData = doc.data();
+        const fromUserRef = db.collection("users").doc(reqData.from);
+        const fromUserSnap = await fromUserRef.get();
+
+        const fromUser = fromUserSnap.exists ? fromUserSnap.data() : {};
+
+        return {
+          id: doc.id,
+          name: fromUser.username || "unknown",
+          contact: fromUser.phone || "No number",
+          status: reqData.status, // 👈 return status for frontend
+        };
+      })
+    );
 
     res.json({ message: "Fetched received requests", received: receivedRequests });
   } catch (err) {
@@ -860,6 +967,8 @@ router.get("/my-received-solo-requests", authenticateToken, async (req, res) => 
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
 
 router.post("/trigger-sos", authenticateToken, async (req, res) => {
   try {
@@ -911,7 +1020,7 @@ router.post("/trigger-sos", authenticateToken, async (req, res) => {
       if (socketId) {
         console.log(`Notifying ${user.name} (${user.id}) about SOS`);
         req.io.to(socketId).emit("sosAlert", {
-          from: userData.name,
+          from: userData.username,
           userId,
           location: { latitude: userLat, longitude: userLng },
           message: `🚨 SOS Alert: ${userData.name} needs help nearby!`,
@@ -937,6 +1046,56 @@ router.post("/trigger-sos", authenticateToken, async (req, res) => {
   }
 });
 
+
+router.get("/my_accepted_connections", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id; // 👈 Assuming user ID is in the token payload
+    const soloRequestsRef = db.collection('soloRequests');
+    const usersRef = db.collection('users');
+
+    // 1️⃣ Query for solo requests where from or to matches current user and status is accepted
+    const fromQuerySnapshot = await soloRequestsRef
+      .where('from', '==', userId)
+      .where('status', '==', 'accepted')
+      .get();
+
+    const toQuerySnapshot = await soloRequestsRef
+      .where('to', '==', userId)
+      .where('status', '==', 'accepted')
+      .get();
+
+    const connections = [];
+
+    // 2️⃣ Collect all unique connected user IDs
+    const connectedUserIds = new Set();
+
+    fromQuerySnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.to && data.to !== userId) connectedUserIds.add(data.to);
+    });
+
+    toQuerySnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.from && data.from !== userId) connectedUserIds.add(data.from);
+    });
+
+    // 3️⃣ Fetch full user data of connected users
+    for (const otherUserId of connectedUserIds) {
+      const userDoc = await usersRef.doc(otherUserId).get();
+      if (userDoc.exists) {
+        connections.push({ id: userDoc.id, ...userDoc.data() });
+      }
+    }
+
+    res.json({
+      message: "Accepted connections fetched successfully",
+      connections,
+    });
+  } catch (err) {
+    console.error('Error fetching accepted connections:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 

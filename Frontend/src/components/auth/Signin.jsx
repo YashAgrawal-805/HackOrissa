@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import assets from "../../assets/assets";   // âœ… fixed import
+import axios from "axios";
 
 function SignInForm() {
   const [state, setState] = React.useState({
@@ -17,14 +18,24 @@ function SignInForm() {
     });
   };
 
-  const handleOnSubmit = (evt) => {
+  const handleOnSubmit = async (evt) => {
     evt.preventDefault();
     const { username, password } = state;
-    alert(`You are login with username: ${username} and password: ${password}`);
-
-    // navigate('/'); // enable if you want redirect
-
-    setState({ username: "", password: "" });
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/users/login",
+        { username, password },
+        { withCredentials: true }
+      );
+      if(response.data.error){
+        alert(response.data.error);
+        return;
+      }
+      localStorage.setItem("token", response.data.token);
+      navigate("/explore");
+    } catch (err) {
+      console.error("Login error:", err);
+    }
   };
 
   return (
@@ -38,7 +49,7 @@ function SignInForm() {
             <img src={assets.facebook_icon} alt="facebook" className="w-5" />
           </a>
           <a href="#" className="social">
-            <img src={assets.email_icon} alt="email" className="w-5" />
+            <img src={assets.email_icon} alt="google" className="w-5" />
           </a>
           <a href="#" className="social">
             <img src={assets.linkedin_icon} alt="linkedin" className="w-5" />

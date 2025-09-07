@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import assets from '../assets/assets'
+import assets from '../assets/assets';
 
 const ThemeToggleBtn = ({theme, setTheme}) => {
 

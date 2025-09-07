@@ -1,20 +1,24 @@
 import React, { useState } from "react";
-import "./styles.css";
-import SignInForm from "./Signin";
-import SignUpForm from "./SignUp";
-import VantaNetBackground from "../bgAuth";
+import "../components/auth/Styles.css";
+import SignInForm from "../components/auth/Signin";
+import SignUpForm from "../components/auth/SignUp";
+import VantaNetBackground from "../utility/BgAuth";
+import { useSelector } from "react-redux";
 
 const AuthApp = ({ theme }) => {
   const [type, setType] = useState("signIn");
   const [splineLoaded, setSplineLoaded] = useState(false);
+  const { lat, lng } = useSelector((state) => state.app.latLng);
 
   const handleOnClick = (text) => {
+    console.log(lat, lng);
     if (text !== type) {
       setType(text);
     }
   };
 
   const handleSplineLoad = () => {
+    console.log(lat, lng);
     setSplineLoaded(true);
   };
 
@@ -33,6 +37,7 @@ const AuthApp = ({ theme }) => {
             theme === "dark" ? "text-white" : "text-black"
           }`}
         >
+          Login Page
         </h1>
 
         <div className={containerClass} id="container">

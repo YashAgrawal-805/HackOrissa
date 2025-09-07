@@ -33,7 +33,7 @@ const ServiceCard = ({service, index}) => {
         />
 
         {/* Content box */}
-        <div className='flex items-center gap-10 p-8 hover:p-7.5 hover:m-0.5 transition-all rounded-[10px] bg-white dark:bg-gray-900 relative z-20'>
+        <div className='flex items-center gap-10 p-8 hover:p-7.5 hover:m-0.5 transition-all rounded-[10px] bg-white dark:bg-gray-900 relative z-18'>
             <div className='bg-gray-100 dark:bg-gray-700 rounded-full'>
                 <img src={service.icon} alt="" className='max-w-24 bg-white dark:bg-gray-900 rounded-full m-2'/>
             </div>
