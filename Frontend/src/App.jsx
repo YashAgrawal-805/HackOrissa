@@ -2,9 +2,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import AuthApp from './components/pages/AuthApp';
-import Explore from './components/pages/Explore';
-import MainPage from './components/pages/MainPage'; 
+import AuthApp from './pages/AuthApp';
+import Explore from './pages/Explore';
+import MainPage from './pages/MainPage'; 
 
 const App = () => {
   const [theme, setTheme] = useState('light');

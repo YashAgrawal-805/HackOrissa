@@ -1,12 +1,12 @@
 
 import React from 'react';
-import Navbar from '../Navbar';
-import Hero from '../Hero';
-import Services from '../Services';
-import Team from '../team/team';
-import VantaNetBackground from '../../Utilities/bg';
-import ContactUs from '../ContactUs';
-import Footer from '../Footer';
+import Navbar from '../components/Navbar';
+import Hero from '../components/Hero';
+import Services from '../components/Services';
+import Team from '../components/team/team';
+import VantaNetBackground from '../Utilities/bg';
+import ContactUs from '../components/ContactUs';
+import Footer from '../components/Footer';
 
 const MainPage = ({ theme, setTheme }) => {
   return (

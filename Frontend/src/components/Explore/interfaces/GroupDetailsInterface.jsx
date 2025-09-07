@@ -56,16 +56,8 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
       style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
         width: '100%',
         height: '100%',
-        background: theme === 'dark'
-          ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%)'
-          : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 75%, #cbd5e1 100%)',
-        borderRadius: '25px',
-        padding: isMobile ? '20px' : '50px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -73,33 +65,6 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
         zIndex: 20,
       }}
     >
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={onBackToMain}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '10px' : '20px',
-          left: isMobile ? '10px' : '20px',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          background: theme === 'dark' ? '#374151' : '#f3f4f6',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '18px',
-          color: theme === 'dark' ? '#ffffff' : '#374151',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-          zIndex: 30
-        }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: theme === 'dark' ? '#ffffff' : '#000000' }}>
-          <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </motion.button>
       <h2 style={{
         textAlign: 'center',
         margin: '20px 0 30px 0',
@@ -112,19 +77,18 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
       <div style={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
-        alignItems: 'center',
-        justifyContent: isMobile ? 'flex-start' : 'space-between',
+        alignItems: isMobile ? 'center' : 'flex-start',
+        justifyContent: 'center',
         width: '100%',
         maxWidth: '900px',
         flexGrow: 1,
+        gap: isMobile ? '20px' : '40px',
       }}>
         <div style={{
-          flex: isMobile ? 'none' : 1,
           display: 'flex',
           flexDirection: 'column',
-          gap: isMobile ? '10px' : '15px',
+          gap: isMobile ? '20px' : '30px',
           width: isMobile ? '100%' : '50%',
-          paddingRight: isMobile ? '0' : '40px',
         }}>
           <div style={{
             display: 'flex',
@@ -371,20 +335,20 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
           </div>
         </div>
         <div style={{
-          flex: 1,
+          flex: isMobile ? 'none' : 1,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           minWidth: '0',
-          height: '100%',
+          height: isMobile ? 'auto' : '100%',
           marginTop: isMobile ? '40px' : '0'
         }}>
           <DotLottieReact
             src="/car.lottie"
             loop
             autoplay
-            style={{ width: isMobile ? '70%' : '80%', height: 'auto', maxWidth: '400px' }}
+            style={{ width: isMobile ? '80%' : '100%', height: 'auto', maxWidth: '400px' }}
           />
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -392,7 +356,6 @@ const GroupDetailsInterface = ({ theme, onBackToMain, isMobile }) => {
             onClick={() => console.log('Group created!')}
             style={{
               marginTop: '20px',
-              marginBottom: '20px',
               padding: '14px 28px',
               borderRadius: '50px',
               background: '#6366f1',

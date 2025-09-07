@@ -62,23 +62,81 @@ const FriendCard = ({ person, theme }) => (
   </motion.div>
 );
 
-const friendsList = [
-  { name: 'Emma Watson', contact: '+1 234 567 9001' },
-  { name: 'Michael Scott', contact: '+1 234 567 9002' },
-  { name: 'Jennifer Lopez', contact: '+1 234 567 9003' },
-  { name: 'Ryan Reynolds', contact: '+1 234 567 9004' },
-  { name: 'Scarlett Johansson', contact: '+1 234 567 9005' },
-  { name: 'Leonardo DiCaprio', contact: '+1 234 567 9006' },
-  { name: 'Angelina Jolie', contact: '+1 234 567 9007' },
-  { name: 'Chris Evans', contact: '+1 234 567 9008' }
-];
+const FriendSection = ({ title, data, theme, isMobile }) => (
+  <div style={{
+    flex: 1,
+    minHeight: '0',
+    display: 'flex',
+    flexDirection: 'column'
+  }}>
+    <h3 style={{
+      textAlign: 'center',
+      margin: '0 0 20px 0',
+      fontSize: isMobile ? '20px' : '24px',
+      fontWeight: '700',
+      color: theme === 'dark' ? '#ffffff' : '#000000',
+    }}>
+      {title}
+    </h3>
+    <div style={{
+      flex: 1,
+      overflowY: 'auto',
+      paddingRight: '8px',
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+      maxHeight: isMobile ? '200px' : 'auto'
+    }}>
+      <style>
+        {`
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}
+      </style>
+      {data.map((person, index) => (
+        <FriendCard
+          key={index}
+          person={person}
+          theme={theme}
+        />
+      ))}
+    </div>
+  </div>
+);
 
 const FriendsList = ({ theme, isMobile }) => {
+  const connectionsList = [
+    { name: 'Emma Watson', contact: '+1 234 567 9001' },
+    { name: 'Michael Scott', contact: '+1 234 567 9002' },
+    { name: 'Jennifer Lopez', contact: '+1 234 567 9003' },
+    { name: 'Ryan Reynolds', contact: '+1 234 567 9004' },
+    { name: 'Scarlett Johansson', contact: '+1 234 567 9005' },
+    { name: 'Leonardo DiCaprio', contact: '+1 234 567 9006' },
+  ];
+
+  const pendingList = [
+    { name: 'John Doe', contact: '+1 234 567 9007' },
+    { name: 'Jane Smith', contact: '+1 234 567 9008' },
+    { name: 'Robert Johnson', contact: '+1 234 567 9009' },
+  ];
+
   return (
-    <>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5 }}
+      style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        marginTop: '15px',
+        padding: '0px'
+      }}
+    >
       <h2 style={{
         textAlign: 'center',
-        margin: '0 0 20px 0',
+        margin: '10px 0 10px 0',
         fontSize: isMobile ? '24px' : '32px',
         fontWeight: '800',
         color: theme === 'dark' ? '#ffffff' : '#000000'
@@ -87,24 +145,33 @@ const FriendsList = ({ theme, isMobile }) => {
       </h2>
       <div style={{
         flex: 1,
-        overflowY: 'auto',
-        paddingRight: '8px',
-        paddingBottom: '20px',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none'
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? '20px' : '40px',
+        minHeight: '0',
+        paddingBottom: '20px'
       }}>
-        <style>
-          {`
-            div::-webkit-scrollbar {
-              display: none;
-            }
-          `}
-        </style>
-        {friendsList.map((friend, index) => (
-          <FriendCard key={index} person={friend} theme={theme} />
-        ))}
+        <FriendSection
+          title="Connections"
+          data={connectionsList}
+          theme={theme}
+          isMobile={isMobile}
+        />
+        {!isMobile && (
+          <div style={{
+            width: '1px',
+            background: theme === 'dark' ? '#475569' : '#e2e8f0',
+            margin: '0 10px'
+          }} />
+        )}
+        <FriendSection
+          title="Pending"
+          data={pendingList}
+          theme={theme}
+          isMobile={isMobile}
+        />
       </div>
-    </>
+    </motion.div>
   );
 };
 

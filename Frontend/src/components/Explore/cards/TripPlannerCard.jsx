@@ -104,15 +104,15 @@ const TripPlannerCard = ({ i, progress, range, targetScale, theme }) => {
       }}
     >
       <motion.div
-        whileHover={showMain ? { y: -10, transition: { duration: 0.3 } } : {}}
+        whileHover={showMain && !isMobile ? { y: -10, transition: { duration: 0.3 } } : {}}
         style={{
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
           height: isMobile ? '80vh' : '500px',
           minHeight: '500px',
-          width: '1000px',
-          maxWidth: '90vw',
+          width: '95vw',
+          maxWidth: '1000px',
           borderRadius: '25px',
           padding: showMain ? (isMobile ? '24px' : '50px') : '0',
           background: theme === 'dark' ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 75%, #cbd5e1 100%)',
@@ -143,7 +143,7 @@ const TripPlannerCard = ({ i, progress, range, targetScale, theme }) => {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: '50px'
+                padding: isMobile ? '24px' : '50px'
               }}
             >
               <h2

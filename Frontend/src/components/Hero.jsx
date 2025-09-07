@@ -73,8 +73,7 @@ const Hero = () => {
         viewport={{ once: true }}
         className="text-sm sm:text-lg font-medium text-gray-500 dark:text-white/75 max-w-[80%] sm:max-w-lg pb-3 mt-4"
       >
-        Creating meaningful connections and turning big ideas into interactive
-        digital experiences.
+        Blending smart planning with real-time safety for worry-free travel.
       </motion.p>
 
       {/* buttons */}

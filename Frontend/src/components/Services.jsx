@@ -8,23 +8,33 @@ const Services = () => {
 
     const servicesData = [
         {
-          title: 'Advertising',
-          description: 'We turn bold ideas into powerful digital solutions that connect, engage...',
+          title: 'Stay Connected,Stay Safe',
+          description: 'Get instant alerts if any group member steps outside the safety radius.',
           icon: assets.ads_icon
         },
         {
-          title: 'Content marketing',
-          description: 'We help you execute your plan and deliver results.',
+          title: 'Find Your StayBuddy',
+          description: 'Helping solo travelers connect and find reliable roommates during trips.',
           icon: assets.marketing_icon
         },
         {
-            title: 'Content writing',
-            description: 'We help you create a marketing strategy that drives results.',
+            title: 'Plan Trip Like a Pro !',
+            description: 'We design the smartest route based on the places you want to explore.',
+            icon: assets.content_icon,
+        },
+         {
+          title: 'Local Food Cuisine',
+          description: 'Get local cuisine recommendations based on where you are.',
+          icon: assets.marketing_icon
+        },
+        {
+            title: 'SOS',
+            description: 'Quick SOS alerts to your group and nearby traveller.',
             icon: assets.content_icon,
         },
         {
-            title: 'Social media',
-            description: 'We help you build a strong social media presence and engage with your audience.',
+            title: 'Alert',
+            description: 'Know before you go—safety notifications keep you protected.',
             icon: assets.social_icon,
         },
     ]

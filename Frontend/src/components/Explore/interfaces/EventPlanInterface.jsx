@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 
 const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isMobile }) => {
   const [mapContainerSize, setMapContainerSize] = useState({ width: 0, height: 0 });
+  const [positionedPlaces, setPositionedPlaces] = useState([]);
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -20,45 +21,89 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
     return () => window.removeEventListener('resize', updateSize);
   }, [isMobile]);
 
-  const positionedPlaces = selectedPlaces.map((place, index) => {
-    const numPlaces = selectedPlaces.length;
-    const paddingX = mapContainerSize.width * 0.1;
-    const paddingY = mapContainerSize.height * 0.2;
-    const availableWidth = mapContainerSize.width - 2 * paddingX;
-    const availableHeight = mapContainerSize.height - 2 * paddingY;
+  useEffect(() => {
+    const newPositionedPlaces = selectedPlaces.map((place, index) => {
+      const numPlaces = selectedPlaces.length;
+      
+      const paddingX = mapContainerSize.width * 0.15; // Increased padding
+      const paddingY = mapContainerSize.height * 0.15;
 
-    const x = numPlaces === 1
-      ? mapContainerSize.width / 2
-      : paddingX + (availableWidth * (index / (numPlaces - 1)));
+      const availableWidth = mapContainerSize.width - 2 * paddingX;
+      const availableHeight = mapContainerSize.height - 2 * paddingY;
+      
+      let x, y;
 
-    const baseYOscillation = availableHeight * 0.25;
-    let y = mapContainerSize.height / 2;
-
-    if (numPlaces > 1) {
-      if (index === 0) {
-        y = mapContainerSize.height / 2 - baseYOscillation * 0.8;
-      } else if (index === numPlaces - 1) {
-        y = mapContainerSize.height / 2 + baseYOscillation * 0.8;
+      if (isMobile) {
+        if (numPlaces <= 1) {
+          x = mapContainerSize.width / 2;
+          y = mapContainerSize.height / 2;
+        } else {
+          const numRows = Math.ceil(numPlaces / 2);
+          const row = Math.floor(index / 2);
+          
+          y = paddingY + (availableHeight / Math.max(1, numRows - 1)) * row;
+          if (index % 2 === 0) {
+            x = paddingX;
+          } else {
+            x = mapContainerSize.width - paddingX;
+          }
+          if (numPlaces % 2 !== 0 && index === numPlaces - 1) {
+             y = mapContainerSize.height - paddingY;
+          }
+        }
       } else {
-        y += Math.sin(index * Math.PI / (numPlaces - 1) * 2) * baseYOscillation * (index % 2 === 0 ? 1 : -1);
+        x = numPlaces <= 1
+          ? mapContainerSize.width / 2
+          : paddingX + (availableWidth * (index / (numPlaces - 1)));
+  
+        const baseYOscillation = availableHeight * 0.25;
+        y = mapContainerSize.height / 2;
+  
+        if (numPlaces > 1) {
+          if (index === 0) {
+            y = mapContainerSize.height / 2 - baseYOscillation * 0.8;
+          } else if (index === numPlaces - 1) {
+            y = mapContainerSize.height / 2 + baseYOscillation * 0.8;
+          } else {
+            y += Math.sin(index * Math.PI / (numPlaces - 1) * 2) * baseYOscillation * (index % 2 === 0 ? 1 : -1);
+          }
+        }
       }
-    }
 
-    return { ...place, x, y };
-  });
+      return { ...place, x, y };
+    });
+    setPositionedPlaces(newPositionedPlaces);
+  }, [mapContainerSize, selectedPlaces, isMobile]);
 
   const generatePath = (places) => {
     if (places.length < 2) return '';
     let path = `M ${places[0].x} ${places[0].y}`;
-    for (let i = 1; i < places.length; i++) {
-      const prev = places[i - 1];
-      const curr = places[i];
-      const cp1X = prev.x + (curr.x - prev.x) / 3;
-      const cp1Y = prev.y;
-      const cp2X = curr.x - (curr.x - prev.x) / 3;
-      const cp2Y = curr.y;
-      path += ` C ${cp1X},${cp1Y} ${cp2X},${cp2Y} ${curr.x},${curr.y}`;
+    
+    if (isMobile) {
+      for (let i = 1; i < places.length; i++) {
+        const prev = places[i - 1];
+        const curr = places[i];
+        
+        const cp1X = prev.x + (curr.x - prev.x) * 0.5;
+        const cp1Y = prev.y;
+        const cp2X = curr.x - (curr.x - prev.x) * 0.5;
+        const cp2Y = curr.y;
+
+        path += ` C ${cp1X},${cp1Y} ${cp2X},${cp2Y} ${curr.x},${curr.y}`;
+      }
+    } else {
+      for (let i = 1; i < places.length; i++) {
+        const prev = places[i - 1];
+        const curr = places[i];
+        const dx = curr.x - prev.x;
+        const cp1X = prev.x + (dx / 3);
+        const cp1Y = prev.y;
+        const cp2X = curr.x - (dx / 3);
+        const cp2Y = curr.y;
+        path += ` C ${cp1X},${cp1Y} ${cp2X},${cp2Y} ${curr.x},${curr.y}`;
+      }
     }
+
     return path;
   };
 
@@ -142,6 +187,7 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
         <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
           {pathData && (
             <motion.path
+              key={pathData}
               d={pathData}
               stroke={theme === 'dark' ? '#6366f1' : '#8b5cf6'}
               strokeWidth="3"
@@ -157,8 +203,8 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
         {positionedPlaces.map((place, index) => (
           <motion.div
             key={place.id}
-            initial={{ scale: 0, rotate: -180, opacity: 0 }}
-            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             transition={{
               delay: index === 0 ? 0.3 : 1.5 + (index * 0.5),
               type: 'spring',
@@ -169,14 +215,18 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
               position: 'absolute',
               left: `${place.x}px`,
               top: `${place.y}px`,
-              transform: 'translate(-50%, -50%)',
+              transform: 'translate(-50%, -100%)',
               zIndex: 2,
               cursor: 'pointer',
               filter: `drop-shadow(0 4px 8px ${
                 index === 0 ? 'rgba(16, 185, 129, 0.7)' :
                 index === positionedPlaces.length - 1 ? 'rgba(239, 68, 68, 0.7)' :
                 'rgba(99, 102, 241, 0.7)'
-              })`
+              })`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              pointerEvents: 'none'
             }}
           >
             <div style={{
@@ -185,14 +235,14 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
               color: index === 0 ? '#10b981' :
                 index === positionedPlaces.length - 1 ? '#ef4444' :
                 '#6366f1',
+              position: 'relative',
+              zIndex: 3
             }}>
               📍
             </div>
             <div style={{
-              position: 'absolute',
-              bottom: '-30px',
-              left: '50%',
-              transform: 'translateX(-50%)',
+              position: 'relative',
+              marginTop: '5px',
               background: theme === 'dark' ? '#1e293b' : 'white',
               color: theme === 'dark' ? '#ffffff' : '#374151',
               padding: '4px 8px',
@@ -201,7 +251,8 @@ const EventPlanInterface = ({ theme, onBackToPlaceSelection, selectedPlaces, isM
               fontWeight: '600',
               whiteSpace: 'nowrap',
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              border: theme === 'dark' ? '1px solid #475569' : '1px solid #e2e8f0'
+              border: theme === 'dark' ? '1px solid #475569' : '1px solid #e2e8f0',
+              zIndex: 3
             }}>
               {place.name}
             </div>

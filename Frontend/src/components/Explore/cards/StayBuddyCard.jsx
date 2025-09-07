@@ -2,10 +2,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion';
 import ImageCarousel from '../../../Utilities/ImageCarousel';
-import StayBuddyButtons from '../buttons/StayBuddyButtons';
+import StayBuddyButtons from '../../../components/Explore/buttons/StayBuddyButtons';
 import CurtainAnimation from '../../../Utilities/CurtainAnimation';
-import InvitationInterface from '../interfaces/InvitationInterface';
-import FriendsList from '../interfaces/FriendsList';
+import InvitationInterface from '../../../components/Explore/interfaces/InvitationInterface';
+import FriendsList from '../../../components/Explore/interfaces/FriendsList';
 
 const carouselImages = [
   'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop',
