@@ -1,10 +1,11 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import assets from "../../assets/assets";   // âœ… fixed import
+import axios from "axios";
 
 function SignInForm() {
   const [state, setState] = React.useState({
-    email: "",
+    username: "",
     password: ""
   });
   const navigate = useNavigate();
@@ -17,14 +18,20 @@ function SignInForm() {
     });
   };
 
-  const handleOnSubmit = (evt) => {
+  const handleOnSubmit = async (evt) => {
     evt.preventDefault();
-    const { email, password } = state;
-    alert(`You are login with email: ${email} and password: ${password}`);
-
-    // navigate('/'); // enable if you want redirect
-
-    setState({ email: "", password: "" });
+    const { username, password } = state;
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/users/login",
+        { username, password },
+        { withCredentials: true }
+      );
+      localStorage.setItem("token", response.data.token);
+      navigate("/explore");
+    } catch (err) {
+      console.error("Login error:", err);
+    }
   };
 
   return (
@@ -47,10 +54,10 @@ function SignInForm() {
 
         <span>or use your account</span>
         <input
-          type="email"
-          placeholder="Email"
-          name="email"
-          value={state.email}
+          type="text"
+          placeholder="username"
+          name="username"
+          value={state.username}
           onChange={handleChange}
           required
         />

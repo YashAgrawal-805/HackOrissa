@@ -1,16 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import assets from "../../assets/assets";
 import ThemeToggleBtn from "../../utility/ThemeToggleBtn";
 import ToggleBtn from "./expToggle"; // reusable toggle button
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsTrack } from "../../store/store";  
+import { setIsSOS } from "../../store/store";
+import { handleSoloTogelle } from "../../controllers/SoloTravellers";
+
 
 const ExpNavbar = ({ theme, setTheme }) => {
+  const dispatch = useDispatch();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isSolo = useSelector((state) => state.app.isSolo);
 
   // state for each toggle
-  const [sosActive, setSosActive] = useState(false);
+  const isTrack = useSelector((state) => state.app.isTrack);
+  const sosActive = useSelector((state) => state.app.isSOS);
+  
   const [alertActive, setAlertActive] = useState(false);
-  const [notifActive, setNotifActive] = useState(false);
+  const [notifActive, setNotifActive] = useState(false); // ✅ backend sync state
+
+  // 🔹 1. Fetch current tracking status on mount
+  useEffect(() => {
+    const fetchTracking = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/api/get-toggle-tracking", {
+          withCredentials: true,
+        });
+        dispatch(setIsTrack(res.data.trackingEnabled || false));
+      } catch (err) {
+        console.error("Error fetching tracking:", err);
+      }
+    };
+    fetchTracking();
+  }, []);
+
+  // 🔹 2. Handle toggle click → call backend
+  const handleTrackingToggle = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/toggle-tracking",
+        {},
+        {withCredentials: true,}
+      );
+      console.log("Toggled tracking:", res.data.trackingEnabled);
+      dispatch(setIsTrack(res.data.trackingEnabled || false));
+    } catch (err) {
+      console.error("Error toggling tracking:", err);
+      alert("Failed to toggle tracking");
+    }
+  };
 
   return (
     <motion.div
@@ -44,17 +85,23 @@ const ExpNavbar = ({ theme, setTheme }) => {
 
         {/* Sidebar Toggles (Mobile Only) */}
         <div className="flex flex-col gap-3 mt-6 px-4">
-          <ToggleBtn label="SOS" active={sosActive} setActive={setSosActive} />
+          <ToggleBtn label="SOS" active={sosActive} setActive={(value) => dispatch(setIsSOS(value))} />
+          <ToggleBtn label="Alert" active={alertActive} setActive={setAlertActive} />
+          <ToggleBtn label="Notification" active={notifActive} setActive={setNotifActive} />
+          
+          {/* 🔹 Tracking toggle hooked with backend */}
           <ToggleBtn
-            label="Alert"
-            active={alertActive}
-            setActive={setAlertActive}
+            label="Tracking"
+            active={isTrack}
+            setActive={handleTrackingToggle}
           />
+
           <ToggleBtn
-            label="Notification"
-            active={notifActive}
-            setActive={setNotifActive}
+            label="ToggleSolo"
+            active={isSolo}
+            setActive={()=>handleSoloTogelle(dispatch)()}
           />
+
           <ThemeToggleBtn theme={theme} setTheme={setTheme} />
         </div>
       </div>
@@ -63,17 +110,22 @@ const ExpNavbar = ({ theme, setTheme }) => {
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Show Toggles only on Desktop */}
         <div className="hidden sm:flex items-center gap-2">
-          <ToggleBtn label="SOS" active={sosActive} setActive={setSosActive} />
+          <ToggleBtn label="SOS" active={sosActive} setActive={(value) => dispatch(setIsSOS(value))} />
+          <ToggleBtn label="Alert" active={alertActive} setActive={setAlertActive} />
+          <ToggleBtn label="Notification" active={notifActive} setActive={setNotifActive} />
+
+          {/* 🔹 Desktop Tracking toggle */}
           <ToggleBtn
-            label="Alert"
-            active={alertActive}
-            setActive={setAlertActive}
+            label="Tracking"
+            active={isTrack}
+            setActive={handleTrackingToggle}
           />
           <ToggleBtn
-            label="Notification"
-            active={notifActive}
-            setActive={setNotifActive}
+            label="ToggleSolo"
+            active={isSolo}
+            setActive={()=>handleSoloTogelle(dispatch)()}
           />
+
           <ThemeToggleBtn theme={theme} setTheme={setTheme} />
         </div>
 

@@ -1,31 +1,39 @@
 import React from "react";
-import { useNavigate } from 'react-router-dom';
-import assets from "../../assets/assets";   // âœ… fixed import
+import { useNavigate } from "react-router-dom";
+import assets from "../../assets/assets";
+import axios from "axios";
 
 function SignUpForm() {
   const [state, setState] = React.useState({
-    name: "",
-    email: "",
-    password: ""
+    username: "",
+    password: "",
+    phone: "",
   });
   const navigate = useNavigate();
 
   const handleChange = (evt) => {
-    const value = evt.target.value;
-    setState({
-      ...state,
-      [evt.target.name]: value
-    });
+    const { name, value } = evt.target;
+    setState((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleOnSubmit = (evt) => {
+  const handleOnSubmit = async (evt) => {
     evt.preventDefault();
-    const { name, email, password } = state;
-    alert(`You are sign up with name: ${name}, email: ${email}, password: ${password}`);
-
-    // navigate('/'); // or navigate to login page
-
-    setState({ name: "", email: "", password: "" });
+    const { username, password, phone } = state;
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/users/register",
+        { username, password, phone },
+        { withCredentials: true }
+      );
+      localStorage.setItem("token", response.data.token);
+      navigate("/explore");
+    }
+    catch (err) {
+      console.error("Signup error:", err);
+    }
   };
 
   return (
@@ -33,7 +41,7 @@ function SignUpForm() {
       <form onSubmit={handleOnSubmit}>
         <h1>Create Account</h1>
 
-        {/* âœ… Social icons using assets */}
+        {/* ✅ Social icons using assets */}
         <div className="social-container">
           <a href="#" className="social">
             <img src={assets.facebook_icon} alt="facebook" className="w-5" />
@@ -46,21 +54,21 @@ function SignUpForm() {
           </a>
         </div>
 
-        <span>or use your email for registration</span>
+        <span>or use your username for registration</span>
         <input
           type="text"
-          name="name"
-          value={state.name}
+          name="username"
+          value={state.username}
           onChange={handleChange}
-          placeholder="Name"
+          placeholder="Username"
           required
         />
         <input
-          type="email"
-          name="email"
-          value={state.email}
+          type="text"
+          name="phone"
+          value={state.phone}
           onChange={handleChange}
-          placeholder="Email"
+          placeholder="Phone"
           required
         />
         <input

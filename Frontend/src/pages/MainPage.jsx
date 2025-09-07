@@ -3,8 +3,8 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import Services from '../components/Services';
-import Team from '../components/team/team';
-import VantaNetBackground from '../utility/bg';
+import Team from '../components/team/Team';
+import VantaNetBackground from '../utility/Bg';
 import ContactUs from '../components/ContactUs';
 import Footer from '../components/Footer';
 

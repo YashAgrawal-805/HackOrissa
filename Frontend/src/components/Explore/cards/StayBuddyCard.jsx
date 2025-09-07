@@ -6,6 +6,10 @@ import StayBuddyButtons from '../buttons/StayBuddyButtons';
 import CurtainAnimation from '../../../utility/CurtainAnimation';
 import InvitationInterface from '../interfaces/InvitationInterface';
 import FriendsList from '../interfaces/FriendsList';
+import { useSelector } from "react-redux";
+import {handleFindTravellers,handleRecieve} from '../../../controllers/SoloTravellers';
+import { useDispatch } from 'react-redux';
+import { setAcceptedRequests, setSendRequests } from '../../../store/store';
 
 const carouselImages = [
   'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop',
@@ -15,6 +19,8 @@ const carouselImages = [
 ];
 
 const StayBuddyCard = ({ i, progress, range, targetScale, theme }) => {
+  const dispatch = useDispatch();
+
   const container = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showCurtain, setShowCurtain] = useState(false);
@@ -23,6 +29,10 @@ const StayBuddyCard = ({ i, progress, range, targetScale, theme }) => {
   const [showInvitationInterface, setShowInvitationInterface] = useState(false);
   const [showFriendsList, setShowFriendsList] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  const { lat, lng} = useSelector((state) => state.app.latLng);
+  const sendRequests = useSelector((state) => state.app.sendRequests);
+  const acceptedRequests = useSelector((state) => state.app.acceptedRequests);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -49,6 +59,14 @@ const StayBuddyCard = ({ i, progress, range, targetScale, theme }) => {
     if (type === 'find') {
       setLottieSrc('/staybuddy.lottie');
       setLoadingText('Finding your stay buddy...');
+      handleFindTravellers(lat, lng).then(( sendInvitations) => {
+        dispatch(setSendRequests(sendInvitations))
+      }
+      );
+      handleRecieve().then((acceptedInvitations) => {
+        dispatch(setAcceptedRequests(acceptedInvitations))
+      }
+      );
       setTimeout(() => {
         setShowCurtain(false);
         setShowInvitationInterface(true);
@@ -200,7 +218,7 @@ const StayBuddyCard = ({ i, progress, range, targetScale, theme }) => {
 
           {showInvitationInterface && (
             <motion.div key="invitation-interface" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.5 }} style={{ height: '100%', display: 'flex', flexDirection: 'column', marginTop: '15px', padding: '0px' }}>
-              <InvitationInterface theme={theme} isMobile={isMobile} />
+              <InvitationInterface theme={theme} isMobile={isMobile} sendInvitations={sendRequests} acceptInvitations={acceptedRequests}/>
             </motion.div>
           )}
 

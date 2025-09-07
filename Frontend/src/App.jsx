@@ -5,6 +5,8 @@ import { Toaster } from 'react-hot-toast';
 import AuthApp from './pages/AuthApp';
 import Explore from './pages/Explore';
 import MainPage from './pages/MainPage'; 
+import LiveTracker from "./controllers/LiveTraking";
+
 
 const App = () => {
   const [theme, setTheme] = useState('light');
@@ -44,6 +46,7 @@ const App = () => {
 
   return (
     <Router>
+      <LiveTracker />
       <div className={`relative ${theme === 'dark' ? 'dark' : ''}`}>
         <Toaster />
         

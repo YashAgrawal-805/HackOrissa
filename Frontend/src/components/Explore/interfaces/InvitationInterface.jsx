@@ -1,6 +1,9 @@
 // src/components/interfaces/InvitationInterface.jsx
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useDispatch } from 'react-redux';
+import { removeSendRequest, removeAcceptedRequest } from "../../../store/store";
+import { handleAccept, handleSendReq } from '../../../controllers/SoloTravellers';
 
 const InvitationCard = ({ person, type, onAction, theme }) => (
   <motion.div
@@ -46,7 +49,7 @@ const InvitationCard = ({ person, type, onAction, theme }) => (
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => onAction(person.name)}
+        onClick={() => onAction(person.id)}
         style={{
           padding: '8px 16px',
           borderRadius: '25px',
@@ -112,29 +115,35 @@ const InvitationSection = ({ title, data, type, onAction, theme, isMobile }) => 
   </div>
 );
 
-const InvitationInterface = ({ theme, isMobile }) => {
-  const sendInvitations = [
-    { name: 'Alex Johnson', contact: '+1 234 567 8901' },
-    { name: 'Sarah Chen', contact: '+1 234 567 8902' },
-    { name: 'Mike Davis', contact: '+1 234 567 8903' },
-    { name: 'Emily Brown', contact: '+1 234 567 8904' },
-    { name: 'David Wilson', contact: '+1 234 567 8905' }
-  ];
+const InvitationInterface = ({ theme, isMobile , sendInvitations, acceptInvitations}) => {
+  const dispatch = useDispatch();
 
-  const acceptInvitations = [
-    { name: 'John Smith', contact: '+1 234 567 8906' },
-    { name: 'Lisa Taylor', contact: '+1 234 567 8907' },
-    { name: 'Robert Lee', contact: '+1 234 567 8908' },
-    { name: 'Maria Garcia', contact: '+1 234 567 8909' },
-    { name: 'James Miller', contact: '+1 234 567 8910' }
-  ];
+  // const sendInvitations = [
+  //   { name: 'Alex Johnson', contact: '+1 234 567 8901' },
+  //   { name: 'Sarah Chen', contact: '+1 234 567 8902' },
+  //   { name: 'Mike Davis', contact: '+1 234 567 8903' },
+  //   { name: 'Emily Brown', contact: '+1 234 567 8904' },
+  //   { name: 'David Wilson', contact: '+1 234 567 8905' }
+  // ];
 
-  const handleSendInvitation = (name) => {
-    console.log(`Sending invitation to ${name}`);
+  // const acceptInvitations = [
+  //   { name: 'John Smith', contact: '+1 234 567 8906' },
+  //   { name: 'Lisa Taylor', contact: '+1 234 567 8907' },
+  //   { name: 'Robert Lee', contact: '+1 234 567 8908' },
+  //   { name: 'Maria Garcia', contact: '+1 234 567 8909' },
+  //   { name: 'James Miller', contact: '+1 234 567 8910' }
+  // ];
+
+  const handleSendInvitation = (id) => {
+    handleSendReq(id);  
+    dispatch(removeSendRequest(id));
+    console.log(`Sending invitation to ${id}`);
   };
 
-  const handleAcceptInvitation = (name) => {
-    console.log(`Accepting invitation from ${name}`);
+  const handleAcceptInvitation = (id) => {
+    handleAccept(id);
+    dispatch(removeAcceptedRequest(id));
+    console.log(`Accepting invitation from ${id}`);
   };
 
   return (
@@ -170,7 +179,7 @@ const InvitationInterface = ({ theme, isMobile }) => {
       }}>
         <InvitationSection
           title="Send Invitation"
-          data={sendInvitations}
+          data={sendInvitations || []}
           type="send"
           onAction={handleSendInvitation}
           theme={theme}
@@ -185,7 +194,7 @@ const InvitationInterface = ({ theme, isMobile }) => {
         )}
         <InvitationSection
           title="Accept Invitation"
-          data={acceptInvitations}
+          data={acceptInvitations || []}
           type="accept"
           onAction={handleAcceptInvitation}
           theme={theme}
