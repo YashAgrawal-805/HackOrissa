@@ -1,4 +1,5 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { distance } from "framer-motion";
 
 const initialState = {
   latLng: { lat: null, lng: null }, // default empty
@@ -66,6 +67,7 @@ const appSlice = createSlice({
       state.acceptedRequests.push({
         id: data.id,
         name: data.name,
+        distance:data.distance
       });
     },
     removeAcceptedRequest: (state, action) => {

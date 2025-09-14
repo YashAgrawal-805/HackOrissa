@@ -54,6 +54,7 @@ const Explore = ({ theme, setTheme }) => {
         dispatch(removeSendRequest(existing.id));
         console.log(`Removed solo traveler: ${existing.name}`);
       } else {
+        console.log("New solo traveler nearby:", data);
         dispatch(
           addSendRequest({
             id: data.id,
@@ -70,11 +71,12 @@ const Explore = ({ theme, setTheme }) => {
       dispatch(
         addAcceptedRequest({
           id: data.from,
-          name: data.username,
+          name: data.name,
           distance: data.distance || null,
         })
       );
-      alert("Request Received from " + data.from, data.username);
+      dispatch(removeSendRequest(data.from));
+      alert("Request Received from " + data.from, data.name);
     };
 
     const handleSosAlert = (data) => {

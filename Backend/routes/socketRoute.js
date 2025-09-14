@@ -89,6 +89,7 @@ module.exports = (io, socket, onlineUsers, db) => {
         return socket.emit("error", { error: "User not found" });
       }
       const userData = snap.data();
+      console.log("User data:", userData);
       // Check if tracking enabled
       if (!userData.trackingEnabled) {
         return socket.emit("error", { error: "Tracking disabled" });
@@ -104,10 +105,12 @@ module.exports = (io, socket, onlineUsers, db) => {
 
       if (!(userData.lastSharedAt && Date.now() - userData.lastSharedAt < THIRTY_MIN)) {
         location = await checkNearbyPlaces(userId);
-        socket.emit("nearbyNotification", {
-          message: `You are ${location.distanceInKm.toFixed(2)} km away from ${location.name}. Open: ${location.openTime} - ${location.closeTime}`,
-          place: location
-        });
+        if(location.message != "No nearby places found"){
+          socket.emit("nearbyNotification", {
+            message: `You are ${location.distanceInKm.toFixed(2)} km away from ${location.name}. Open: ${location.openTime} - ${location.closeTime}`,
+            place: location
+          });
+        }
       }
       
       if (userData.groups && userData.groups.length > 0) {

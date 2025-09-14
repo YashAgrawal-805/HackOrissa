@@ -315,7 +315,7 @@ router.post('/toggle-solo', authenticateToken, async (req, res) => {
     }
 
     const userData = userSnap.data();
-
+    console.log(userData)
     // 2️⃣ Toggle isSolo
     const currentStatus = userData.Issolo || false;
     const newStatus = !currentStatus;
@@ -326,30 +326,32 @@ router.post('/toggle-solo', authenticateToken, async (req, res) => {
     });
 
     // 4️⃣ If solo enabled → check nearby solo travelers
+    console.log("last location", userData.lastLocation)
     let nearbyUsers = [];
     if (userData.lastLocation) {
       const usersRef = db.collection("users");
       const allUsersSnap = await usersRef.get();
+      console.log(allUsersSnap.docs.length)
 
       allUsersSnap.forEach((doc) => {
         if (doc.id === userId) return; // skip self
         const data = doc.data();
-        if (data.Issolo && data.lastLocation) {
+        if (data.lastLocation) {
           const distance = geolib.getDistance(
             { latitude: userData.lastLocation.latitude, longitude: userData.lastLocation.longitude },
             { latitude: data.lastLocation.latitude, longitude: data.lastLocation.longitude }
           );
-
+          console.log(data.username)
           if (distance <= 10000) { // within 10 km
             nearbyUsers.push({
               id: doc.id,
               username: data.username || "Unknown",
-              distance: (distance / 1000).toFixed(2) + " km"
+              distance: (distance / 1000).toFixed(2)
             });
           }
         }
       });
-
+      console.log(nearbyUsers);
       // 5️⃣ Emit solo traveler update to all nearby users
       nearbyUsers.forEach(user => {
         const socketId = global.onlineUsers?.get(user.id); // depends on how you stored socket mapping
@@ -635,7 +637,6 @@ router.get('/find-solo-travellers', authenticateToken, async (req, res) => {
           nearbyTravellers.push({
             id: doc.id,
             name: data.username,
-            contact: data.phone,
             distance: Number(distance.toFixed(2))
           });
         }
@@ -726,6 +727,33 @@ router.post("/send-solo-request", authenticateToken, async (req, res) => {
 
     if (!toUserId) return res.status(400).json({ error: "Missing toUserId" });
 
+    const userDoc = await db.collection("users").doc(fromUserId).get();
+    if (!userDoc.exists || !userDoc.data().Issolo) {
+      console.log("dcudbscujbsi")
+      return res.status(200).json({ error: "You are not a solo traveller" });
+    }
+
+    const toUserDoc = await db.collection("users").doc(toUserId).get();
+    if (!toUserDoc.exists || !toUserDoc.data().Issolo) {
+      return res.status(400).json({ error: "The user you are trying to reach is not a solo traveller" });
+    }
+
+    if (
+      userDoc.data().lastLocation?.latitude &&
+      userDoc.data().lastLocation?.longitude &&
+      toUserDoc.exists &&
+      toUserDoc.data().lastLocation?.latitude &&
+      toUserDoc.data().lastLocation?.longitude
+    ) {
+      distance = getDistanceFromLatLonInKm(
+        userDoc.data().lastLocation.latitude,
+        userDoc.data().lastLocation.longitude,
+        toUserDoc.data().lastLocation.latitude,
+        toUserDoc.data().lastLocation.longitude
+      ).toFixed(2);
+      console.log("I am distance", distance);
+    }
+
     // save request in Firestore
     await db.collection("soloRequests").add({
       from: fromUserId,
@@ -739,6 +767,8 @@ router.post("/send-solo-request", authenticateToken, async (req, res) => {
     if (socketId) {
       req.io.to(socketId).emit("soloRequestReceived", {
         from: fromUserId,
+        name: userDoc.data().name || userDoc.data().username || "Unknown",
+        distance: distance || "unknown",
         message: "You have a new solo request!",
       });
     }
@@ -756,12 +786,17 @@ router.post("/accept-solo-request", authenticateToken, async (req, res) => {
     const { requestId } = req.body;
     const userId = req.user.id;
 
+    console.log("Request ID:", requestId, "User ID:", userId);
+
     const reqRef = db.collection("soloRequests").doc(requestId);
+    console.log("Request Ref:", reqRef);
     const reqSnap = await reqRef.get();
+    console.log("Request Data:", reqSnap.data());
 
     if (!reqSnap.exists) return res.status(404).json({ error: "Request not found" });
 
     const requestData = reqSnap.data();
+    console.log("ravisibjbjojoj",requestData)
 
     if (requestData.to !== userId) {
       return res.status(403).json({ error: "Not authorized to accept this request" });
@@ -783,7 +818,6 @@ router.post("/accept-solo-request", authenticateToken, async (req, res) => {
     if (fromSocket) {
       req.io.to(fromSocket).emit("soloRequestAccepted", {
         by: userId,
-        contact: toUser.contact || "No number",
       });
     }
 
@@ -791,7 +825,6 @@ router.post("/accept-solo-request", authenticateToken, async (req, res) => {
     if (toSocket) {
       req.io.to(toSocket).emit("soloRequestAccepted", {
         by: userId,
-        contact: fromUser.contact || "No number",
       });
     }
 
@@ -847,7 +880,7 @@ router.get("/find_restaurants", async (req, res) => {
 
         const distance = geolib.getDistance(userLocation, restaurantLocation); // meters
 
-        if (distance <= 5000) { // within 10 km
+        if (distance <= 6000) { // within 10 km
           nearbyRestaurants.push({
             id: doc.id,
             ...data,
@@ -856,6 +889,7 @@ router.get("/find_restaurants", async (req, res) => {
         }
       }
     });
+    console.log("Nearby:",nearbyRestaurants)
 
     // 3️⃣ Sort by distance (nearest first)
     nearbyRestaurants.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
@@ -933,30 +967,51 @@ router.get("/my-received-solo-requests", authenticateToken, async (req, res) => 
   try {
     const userId = req.user.id;
 
-    // ✅ Only fetch pending requests sent TO the user
+    // ✅ Fetch pending requests sent TO this user
     const recvSnap = await db
       .collection("soloRequests")
       .where("to", "==", userId)
-      .where("status", "==", "pending") // 👈 only pending
+      .where("status", "==", "pending")
       .get();
 
     if (recvSnap.empty) {
       return res.json({ message: "No received requests", received: [] });
     }
 
+    // 🔹 Fetch current user location (to compute distance)
+    const currentUserSnap = await db.collection("users").doc(userId).get();
+    const currentUser = currentUserSnap.exists ? currentUserSnap.data() : {};
+    const userLat = currentUser?.lastLocation?.latitude;
+    const userLng = currentUser?.lastLocation?.longitude;
+
     const receivedRequests = await Promise.all(
       recvSnap.docs.map(async (doc) => {
         const reqData = doc.data();
+
+        // Get sender details
         const fromUserRef = db.collection("users").doc(reqData.from);
         const fromUserSnap = await fromUserRef.get();
-
         const fromUser = fromUserSnap.exists ? fromUserSnap.data() : {};
+
+        // Default distance
+        let distance = null;
+        if (
+          userLat && userLng &&
+          fromUser?.lastLocation?.latitude &&
+          fromUser?.lastLocation?.longitude
+        ) {
+          distance = getDistanceFromLatLonInKm(
+            userLat, userLng,
+            fromUser.lastLocation.latitude,
+            fromUser.lastLocation.longitude
+          ).toFixed(2);
+        }
 
         return {
           id: doc.id,
           name: fromUser.username || "unknown",
-          contact: fromUser.phone || "No number",
-          status: reqData.status, // 👈 return status for frontend
+          status: reqData.status,
+          distance: distance ? Number(distance) : null
         };
       })
     );
@@ -1005,7 +1060,7 @@ router.post("/trigger-sos", authenticateToken, async (req, res) => {
           data.lastLocation.longitude
         );
 
-        if (distance <= 5) {
+        if (distance <= 10) {
           nearbyUsers.push({ id: doc.id, name: data.username });
         }
       }

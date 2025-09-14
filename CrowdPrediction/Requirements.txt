@@ -1,0 +1,31 @@
+# Core libraries
+numpy
+pandas
+scikit-learn
+xgboost
+
+# LangChain ecosystem
+langchain
+langchain-google-genai
+langchain-community
+flask
+flask-cors
+
+# Google Gemini SDK
+google-generativeai
+
+# Embeddings & FAISS
+faiss-cpu
+sentence-transformers
+
+# Text processing
+tiktoken
+
+# Environment management
+python-dotenv
+
+# Visualization & plotting
+matplotlib
+
+# HTTP & API requests
+requests

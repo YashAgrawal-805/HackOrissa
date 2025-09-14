@@ -32,7 +32,7 @@ export const handleRecieve = async () => {
   }
 };
 
-export const handleAccept = (requestId) => async () => {
+export const handleAccept = async (requestId) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/accept-solo-request",

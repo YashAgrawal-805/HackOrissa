@@ -9,12 +9,11 @@ const Title = ({ title, desc }) => (
 );
 
 const teamMembers = [
-  { name: 'Emily Kim', role: 'Founder' },
-  { name: 'Michael Steward', role: 'Creative Director' },
-  { name: 'Emma Rodriguez', role: 'Lead Developer' },
-  { name: 'Julia Gimmel', role: 'UX Designer' },
-  { name: 'Lisa Anderson', role: 'Marketing Manager' },
-  { name: 'James Wilson', role: 'Product Manager' },
+  { name: 'Yash Agrawal', role: 'Team Lead' },
+  { name: 'Naresh Kumar', role: 'UI/UX designer' },
+  { name: 'Swaraj Ku. Sahoo', role: 'Technical Lead' },
+  { name: 'Shantanu Ku. Adhikari', role: 'ML Lead' },
+  { name: 'Subrat Ku. Malla', role: 'Content Lead' },
 ];
 
 const memberImages = [

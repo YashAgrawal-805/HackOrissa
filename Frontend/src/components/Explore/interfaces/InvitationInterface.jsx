@@ -43,7 +43,7 @@ const InvitationCard = ({ person, type, onAction, theme }) => (
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap'
         }}>
-          {person.contact}
+          {`${person.distance} km away`}
         </p>
       </div>
       <motion.button
@@ -134,17 +134,37 @@ const InvitationInterface = ({ theme, isMobile , sendInvitations, acceptInvitati
   //   { name: 'James Miller', contact: '+1 234 567 8910' }
   // ];
 
-  const handleSendInvitation = (id) => {
-    handleSendReq(id);  
-    dispatch(removeSendRequest(id));
-    console.log(`Sending invitation to ${id}`);
+  const handleSendInvitation = async (id) => {
+    try {
+      const res = await handleSendReq(id);
+      console.log(res);
+      if (res.error) {
+        alert(res.error);
+        return;
+      }
+  
+      dispatch(removeSendRequest(id));
+      console.log(`Sending invitation to ${id}`);
+    } catch (err) {
+      console.error("Error sending invitation:", err);
+      alert("Something went wrong. Please try again.");
+    }
   };
-
-  const handleAcceptInvitation = (id) => {
-    console.log("Accepting invitation for ID:", id);
-    handleAccept(id)();
+  
+  const handleAcceptInvitation = async (id) => {
+    try
+    {console.log("Accepting invitation for ID:", id);
+    const res = await handleAccept(id);
+    if (res.error) {
+      alert(res.error);
+      return;
+    }
     dispatch(removeAcceptedRequest(id));
-    console.log(`Accepting invitation from ${id}`);
+    console.log(`Accepting invitation from ${id}`);}
+    catch (err) {
+      console.error("Error accepting invitation:", err);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (

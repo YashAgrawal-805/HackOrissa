@@ -128,6 +128,9 @@ async function checkNearbyPlaces(userId) {
       closestPlace = place;
     }
   }
+  if(!closestPlace){
+    return { message: "No nearby places found" };
+  }
   await db.collection("users").doc(userId).update({
     lastSharedAt: Date.now(),
     lastSharedPlace: closestPlace.name
